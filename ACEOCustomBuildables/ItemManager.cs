@@ -1,13 +1,8 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using JetBrains.Annotations;
-using System.Security.Policy;
-using ACEOCustomBuildables.Patches;
-using UModFramework.Extensions;
-using static ACEOCustomBuildables.JSONManager;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace ACEOCustomBuildables
 {

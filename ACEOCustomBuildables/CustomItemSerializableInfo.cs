@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using System.IO;
 using static ACEOCustomBuildables.JSONManager;
 
+
 namespace ACEOCustomBuildables
 {
+    // This entire class is just an placeholder/limited feature class, will be expanded for save load (determines between mods and non-mods)
     class CustomItemSerializableInfo : MonoBehaviour
     {
         string modId;

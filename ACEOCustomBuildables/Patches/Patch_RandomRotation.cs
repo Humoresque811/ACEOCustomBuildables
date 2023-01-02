@@ -1,4 +1,8 @@
 using UnityEngine;
+using UnityEngine.UI;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using HarmonyLib;
 
 namespace ACEOCustomBuildables.Patches
@@ -12,7 +16,7 @@ namespace ACEOCustomBuildables.Patches
             // If user specifies in config for no random rotation.
             if (ACEOCustomBuildablesConfig.disableRandomRotation)
             {
-                Object.Destroy( __instance );
+                UnityEngine.Object.Destroy( __instance );
                 return false;
             }
 
@@ -24,7 +28,7 @@ namespace ACEOCustomBuildables.Patches
                     return true;
                 }
 
-                Object.Destroy( __instance );
+                UnityEngine.Object.Destroy( __instance );
                 return false;
             }
 

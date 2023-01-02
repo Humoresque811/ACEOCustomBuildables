@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.ConstrainedExecution;
 
 namespace ACEOCustomBuildables
 {
@@ -87,6 +88,7 @@ namespace ACEOCustomBuildables
                         {
                             ACEOCustomBuildables.Log("[Buildable Error] You have two mods with the same id... This will result in problems with saveload, so the mod called " +
                                 buildableMods[k].name + " with id " + buildableMods[k].id + " was removed.");
+                            DialogPanel.Instance.ShowMessagePanel("[Airport CEO Custom Buildables] Your mod \"" + buildableMods[k].name + "\" has a duclicate id to mod \"" + buildableMods[i].name + "\", so the first mod wasn't loaded.", Color.black);
                             buildableMods.RemoveAt(i);
                             break;
                         }

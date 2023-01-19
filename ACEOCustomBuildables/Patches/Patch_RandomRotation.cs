@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using HarmonyLib;
 
-namespace ACEOCustomBuildables.Patches
+namespace ACEOCustomBuildables
 {
     [HarmonyPatch(typeof(AttachedObjectPositioningHandler))]
     [HarmonyPatch("ExecuteObjectPositioningAdjustment")]
@@ -21,15 +21,24 @@ namespace ACEOCustomBuildables.Patches
             }
 
             // If the item is custom
-            if (__instance.gameObject.transform.parent.parent.TryGetComponent(out CustomItemSerializableInfo mod))
+            if (__instance.gameObject.transform.parent.parent.TryGetComponent(out CustomItemSerializableComponent mod))
             {
-                if (mod.useRandomRotation)
+                try
                 {
+                    if (JSONManager.buildableMods[mod.index].useRandomRotation)
+                    {
+                        return true;
+                    }
+
+                    UnityEngine.Object.Destroy(__instance);
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    // If it fails log and return true because its vanilla :|
+                    ACEOCustomBuildables.Log("[Mod Error] Random Rotation Patch failed. Error: " + ex.Message );
                     return true;
                 }
-
-                UnityEngine.Object.Destroy( __instance );
-                return false;
             }
 
             // Otherwise, go ahead

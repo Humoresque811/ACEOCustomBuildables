@@ -13,6 +13,7 @@ namespace ACEOCustomBuildables
         [System.Serializable]
         public class buildableMod
         {
+            //public string buildableType; //curently unused
             public bool enabled;
             public string name;
             public string id;
@@ -27,6 +28,8 @@ namespace ACEOCustomBuildables
             public bool bogusOverride;
             public string itemPlacementArea;
             public bool useRandomRotation;
+            public int constructionEnergy;
+            public int contractors;
         }
 
 
@@ -36,6 +39,12 @@ namespace ACEOCustomBuildables
 
         public static void importJSON()
         {
+            // intitial checks
+            if (string.IsNullOrEmpty(basePath))
+            {
+                ACEOCustomBuildables.Log("[mod Error] The base path is empty or null... ");
+                return;
+            }
             if (!Directory.Exists(basePath))
             {
                 ACEOCustomBuildables.Log("[Mod Error] There is no directory at the base path...");
@@ -132,6 +141,8 @@ namespace ACEOCustomBuildables
             mod.bogusOverride = false;
             mod.itemPlacementArea = "Both";
             mod.useRandomRotation = false;
+            mod.constructionEnergy = 50;
+            mod.contractors = 1;
         }
 
         private static string bogusNumberScanner(int index)
@@ -170,6 +181,39 @@ namespace ACEOCustomBuildables
                 buildableMods.RemoveAt(index);
                 return dialog;
             }
+
+            // Need the contruction variables to be valid
+            if (mod.constructionEnergy <= 0)
+            {
+                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a construction energy value below or at 0, so it was changed to 50.");
+                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a construction energy value below or at 0, so it was changed to 50.";
+                mod.constructionEnergy = 50;
+                return dialog;
+            }
+            if (mod.constructionEnergy > 5000)
+            {
+                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a too high construction energy value, so it was changed to 50.");
+                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a too high construction energy value, so it was changed to 50.";
+                mod.constructionEnergy = 50;
+                return dialog;
+            }
+
+            if (mod.constructionEnergy <= 0)
+            {
+                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a contracters value below or at 0, so it was changed to 1");
+                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a contracters value below or at 0, so it was changed to 1.";
+                mod.contractors = 1;
+                return dialog;
+            }
+            if (mod.constructionEnergy > 5000)
+            {
+                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a too high contractors value, so it was changed to 1.");
+                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a too high contractors value, so it was changed to 1.";
+                mod.contractors = 1;
+                return dialog;
+            }
+
+
 
             // Non critical, both is assumed. Just for good measure
             bool correctItemPlacementAreaInput = false;

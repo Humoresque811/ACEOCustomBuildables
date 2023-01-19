@@ -4,10 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UModFramework.API;
+using Newtonsoft.Json;
 
 namespace ACEOCustomBuildables
 {
-    [UMFHarmony(2)] //Set this to the number of harmony patches in your mod.
+    [UMFHarmony(6)] //Set this to the number of harmony patches in your mod.
     [UMFScript]
     class ACEOCustomBuildables : MonoBehaviour
     {
@@ -31,6 +32,23 @@ namespace ACEOCustomBuildables
 
         void Start()
         {
+            try
+            {
+                
+                using (FileStream fileStream = new FileStream("C:\\Users\\zsolt\\AppData\\Roaming\\Apoapsis Studios\\Airport CEO\\hi.json", FileMode.Create))
+                {
+                    using (StreamWriter writer = new StreamWriter(fileStream))
+                    {
+                        writer.WriteLine("Seriously");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ACEOCustomBuildables.Log("seriously. E: " + ex.Message);
+                return;
+            }
+
             try
             {
                 string path = Path.Combine(Application.persistentDataPath, "Buildables");

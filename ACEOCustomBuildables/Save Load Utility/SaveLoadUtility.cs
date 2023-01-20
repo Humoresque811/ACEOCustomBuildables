@@ -163,16 +163,25 @@ namespace ACEOCustomBuildables
                 return;
             }
 
-            // Get path, trim "/", add appropriate sub-path, log in mod log only
+            // Get basepath, add it if not allready there
             string basepath = Singleton<SaveLoadGameDataController>.Instance.GetUserSavedDataSearchPath();
-            path = basepath.Remove(basepath.Length - 1) + "\\" + path;
+            if (!string.Equals(path.SafeSubstring(0, 2), "C:"))
+            {
+                path = basepath.Remove(basepath.Length - 1) + "\\" + path;
+            }
+
+            // Make sure the directory does exist
             if (!Directory.Exists(path))
             {
-                quicklog("The directory for saving does not exist!", true);
+                quicklog("The directory for saving does not exist! The path was \"" + path + "\".", true);
                 return;
             }
+
+            // Add the filename itself
             path = path + "\\" + fileName;
-            quicklog("Path is \"" + path + "\"", false);
+            quicklog("Full path is \"" + path + "\"", false);
+
+            // Make sure the file doesn't allready exist
             if (File.Exists(path))
             {
                 quicklog("The file allready exists!", true);

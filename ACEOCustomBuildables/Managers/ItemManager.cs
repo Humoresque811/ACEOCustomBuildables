@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace ACEOCustomBuildables
 {
@@ -41,6 +42,7 @@ namespace ACEOCustomBuildables
                     newBuildable = Instantiate(template, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
 
                     newBuildable = convertPlaceableItemIntoCustom(newBuildable, i, 0);
+                    newBuildable.transform.GetChild(0).GetChild(0).localScale = calculateScale(newBuildable.transform.GetChild(0).GetChild(0).gameObject, i);
 
                     if (newBuildable == null)
                     {
@@ -66,7 +68,7 @@ namespace ACEOCustomBuildables
             itemsFailed = false;
         }
 
-        public static void convertItemToCustom(GameObject item, int index, bool useRandomRotation, float sprietRotation, float itemRotation)
+        public static void convertItemToCustom(GameObject item, int index, bool useRandomRotation, float spriteRotation, float itemRotation)
         {
             try
             {
@@ -87,8 +89,9 @@ namespace ACEOCustomBuildables
                 item.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().material = getSpriteNonLitMaterial(); // Construction wireframe
                 if (!useRandomRotation)
                 {
-                    sprite.transform.eulerAngles = new Vector3(0, 0, sprietRotation);
+                    sprite.transform.eulerAngles = new Vector3(0, 0, spriteRotation);
                 }
+                item.transform.GetChild(0).GetChild(0).localScale = calculateScale(item.transform.GetChild(0).GetChild(0).gameObject, index);
 
                 item.transform.GetChild(2).GetChild(0).GetChild(0).transform.position += item.transform.position; // Neg Corner
                 item.transform.GetChild(2).GetChild(0).GetChild(1).transform.position += item.transform.position; // Pos Corner
@@ -128,7 +131,8 @@ namespace ACEOCustomBuildables
             shadow.GetComponent<SpriteRenderer>().sprite = JSONManager.getSpriteFromPath(index, "Shadow");
 
             // Texture scaling
-            int x = JSONManager.buildableMods[index].x;
+            //texture.transform.localScale = calculateScale(texture, index);
+            /*int x = JSONManager.buildableMods[index].x;
             int y = JSONManager.buildableMods[index].y;
             if (x == y)
             {
@@ -144,7 +148,7 @@ namespace ACEOCustomBuildables
             {
                 texture.transform.localScale = new Vector3(x, x, 1);
                 shadow.transform.localScale = new Vector3(x, x, 1);
-            }
+            }*/
 
             // Edit odd overlay thing (IDK what it does...?)
             overlay.transform.GetChild(0).localScale = new Vector3(JSONManager.buildableMods[index].x, JSONManager.buildableMods[index].y, 1);
@@ -225,25 +229,45 @@ namespace ACEOCustomBuildables
             return offset;
         }
 
-        private static Vector3[] calculateAllPostions(int x_width, int y_height, Vector3 center)
+        public static Vector3 calculateScale(GameObject texture, int index)
         {
-            Vector3[] returnArray = new Vector3[(x_width * y_height)];
-            float verticalHalf = (float) Decimal.Divide(y_height, 2);
-            float horizonatlHalf = (float) Decimal.Divide(x_width, 2);
-            float verticalAdd = -0.5f; // y_height % 2 == 0 ? 0.5f : 0;
-            float horizontalAdd = -0.5f; // x_width % 2 == 0 ? 0.5f : 0;
+            Bounds textureBounds = texture.GetComponent<SpriteRenderer>().bounds;
+            Vector2 bounds = new Vector2(textureBounds.size.x, textureBounds.size.y);
 
-            for (int x = 0; x < x_width; x++)
+            bounds.x = (float)Math.Round(bounds.x, 2);
+            bounds.y = (float)Math.Round(bounds.y, 2);
+
+            int x = JSONManager.buildableMods[index].x;
+            int y = JSONManager.buildableMods[index].y;
+
+            if (texture.transform.parent.parent.rotation.eulerAngles.z == 90 || texture.transform.parent.parent.rotation.eulerAngles.z == 270)
             {
-                for (int y = 0; y < y_height; y++)
-                {
-                    returnArray[(x * (x_width - 1)) + y].x = x - horizonatlHalf - horizontalAdd + center.x;
-                    returnArray[(x * (x_width - 1)) + y].y = y - verticalHalf - verticalAdd + center.y;
-                }
+                x = JSONManager.buildableMods[index].y;
+                y = JSONManager.buildableMods[index].x;
             }
 
-            return returnArray;
-        }
+            float scaleValueX = 1f;
+            float scaleValueY = 1f;
+
+            if (x == y)
+            {
+                scaleValueX = x / bounds.x;
+                scaleValueY = y / bounds.y;
+            }
+            else if (x > y)
+            {
+                // Cap the scale
+                scaleValueY = y / bounds.y;
+                scaleValueX = scaleValueY;
+            }
+            else if (y > x)
+            {
+                // cap the scale
+                scaleValueX = x / bounds.x;
+                scaleValueY = scaleValueX;
+            }
+            return new Vector3(scaleValueX, scaleValueY, 1f);
+        }   
 
         private static Material getSpriteNonLitMaterial()
         {

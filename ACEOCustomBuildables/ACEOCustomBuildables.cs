@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace ACEOCustomBuildables
 {
-    [UMFHarmony(6)] //Set this to the number of harmony patches in your mod.
+    [UMFHarmony(9)] //Set this to the number of harmony patches in your mod.
     [UMFScript]
     class ACEOCustomBuildables : MonoBehaviour
     {
@@ -34,24 +34,7 @@ namespace ACEOCustomBuildables
         {
             try
             {
-                
-                using (FileStream fileStream = new FileStream("C:\\Users\\zsolt\\AppData\\Roaming\\Apoapsis Studios\\Airport CEO\\hi.json", FileMode.Create))
-                {
-                    using (StreamWriter writer = new StreamWriter(fileStream))
-                    {
-                        writer.WriteLine("Seriously");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                ACEOCustomBuildables.Log("seriously. E: " + ex.Message);
-                return;
-            }
-
-            try
-            {
-                string path = Path.Combine(Application.persistentDataPath, "Buildables");
+                string path = Application.persistentDataPath + JSONManager.basePathAddativeItems;
                 Utils.CreateFolderIfNotExist(path);
                 ACEOCustomBuildables.Log("[Mod Success] Got/Created buildable folder");
                 JSONManager.basePath = path;

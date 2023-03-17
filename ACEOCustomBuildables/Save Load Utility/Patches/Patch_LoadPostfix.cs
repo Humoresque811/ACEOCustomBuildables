@@ -13,24 +13,11 @@ namespace ACEOCustomBuildables.Patches
     static class Patch_LoadPostfix
     {
         private static string savePath;
-        private static CustomItemSerializableWrapper customItemSerializableWrapper = null;
 
         [HarmonyPatch("LoadGameDataCoroutine")]
         public static void Prefix(SaveLoadGameDataController __instance)
         {
-            if (TemplateManager.getAllTemplates())
-            {
-                ACEOCustomBuildables.Log("[Mod Nuetral] Started loading mod info!");
-                JSONManager.importJSON();
-                if (JSONManager.buildableMods.Count != 0)
-                {
-                    ItemManager.clearBuildables();
-                    UIManager.clearUI();
-                    ACEOCustomBuildables.loadMods();
-                    ACEOCustomBuildables.buildableCreationProccessInProgress = true;
-                }
-            }
-            savePath = __instance.savePath;
+            //loadMods(__instance.savePath);
         }
 
         [HarmonyPatch("LoadGameDataCoroutine", MethodType.Enumerator)]
@@ -41,7 +28,11 @@ namespace ACEOCustomBuildables.Patches
             {
                 return;
             }
+
+            // Setup visual log stuff
+            Singleton<SceneMessagePanelUI>.Instance.SetLoadingText("Loading Saved Custom Buildables...", 97);
             SaveLoadUtility.quicklog("Starting Custom Load Round!", true);
+
             // Make sure the diretory exists!
             if (!Directory.Exists(savePath))
             {
@@ -119,30 +110,69 @@ namespace ACEOCustomBuildables.Patches
                     // Auxilary checks, to make sure
                     if (!string.Equals(worldItem.ReferenceID, customItem.referenceID))
                     {
-                        SaveLoadUtility.quicklog("What? The reference ID is different, but the postion and floor aren't? huh", true);
+                        SaveLoadUtility.quicklog("What? The reference ID is different, but the postion and floor are the same? huh?", true);
                         continue;
                     }
 
                     // We know now that they are the same! We need to find the index of the mod from the id now
-                    for (int i = 0; i < buildableMods.Count; i++)
+                    for (int i = 0; i < JSONManager.itemMods.Count; i++)
                     {
-                        if (!string.Equals(JSONManager.buildableMods[i].id, customItem.modId))
+                        if (!string.Equals(JSONManager.itemMods[i].id, customItem.modId))
                         {
+                            if (i != JSONManager.itemMods.Count - 1)
+                            {
+                                continue;
+                            }
+
+                            // Now the problem is there isn't a matching ID!
+                            SaveLoadUtility.quicklog("[Buildable Problem] A custom item is in the processs of being loaded, but a custom item with the id in the save file doesn't exist. " +
+                                "This probably means that a mod was uninstalled or its ID was changed. To fix this, either re-install the mod or revert any changes made to a mods id. " +
+                                "The id being looked for is " + customItem.modId + ". For help, contact Humoresque.", false);
                             continue;
                         }
 
                         // The id is the same!
-                        if (JSONManager.buildableMods[i].useRandomRotation)
+                        if (JSONManager.itemMods[i].useRandomRotation)
                         {
                             ItemManager.convertItemToCustom(worldItem.gameObject, i, true, spriteRotation, itemRotation);
                             break;
                         }
 
                         ItemManager.convertItemToCustom(worldItem.gameObject, i, false, spriteRotation, itemRotation);
+                        break;
                     }
                 }
             }
-            SaveLoadUtility.quicklog("Custom items loaded successfully!", true);
+            SaveLoadUtility.quicklog("Custom items finished loading, without any errors!", true);
+        }
+
+
+        public static void loadMods(string savePath)
+        {
+            Singleton<SceneMessagePanelUI>.Instance.SetLoadingText("Creating Custom Buildables...", 5);
+            if (TemplateManager.getAllTemplates())
+            {
+                ACEOCustomBuildables.Log("[Mod Nuetral] Started loading mod info!");
+                JSONManager.importJSON();
+                if (JSONManager.itemMods.Count != 0)
+                {
+                    ItemManager.clearBuildables();
+                    UIManager.clearUI();
+                    ACEOCustomBuildables.loadMods();
+                    ACEOCustomBuildables.buildableCreationProccessInProgress = true;
+                }
+            }
+            Patch_LoadPostfix.savePath = savePath;
+        }
+    }
+
+    [HarmonyPatch(typeof(SaveLoadGameDataController))]
+    static class NewGamePostix
+    {
+        [HarmonyPatch("StartNewGame")]
+        public static void Prefix(SaveLoadGameDataController __instance)
+        {
+            Patch_LoadPostfix.loadMods(__instance.savePath);
         }
     }
 }

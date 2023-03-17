@@ -24,7 +24,7 @@ namespace ACEOCustomBuildables
 
         public static void createUI()
         {
-            for (int i = 0; i < JSONManager.buildableMods.Count; i++)
+            for (int i = 0; i < JSONManager.itemMods.Count; i++)
             {
                 try
                 {
@@ -43,23 +43,24 @@ namespace ACEOCustomBuildables
                     newButton.gameObject.AddComponent(typeof(CustomBuildUI));
                     CustomBuildUI buildUI = newButton.GetComponent<CustomBuildUI>();
 
-                    buildUI.buildableName = JSONManager.buildableMods[i].name;
-                    buildUI.buildableDescription = JSONManager.buildableMods[i].description;
-                    buildUI.buildableCost = JSONManager.buildableMods[i].buildCost;
-                    buildUI.buildableOperatingCost = JSONManager.buildableMods[i].operationCost;
+                    buildUI.buildableName = JSONManager.itemMods[i].name;
+                    buildUI.buildableDescription = JSONManager.itemMods[i].description;
+                    buildUI.buildableCost = JSONManager.itemMods[i].buildCost;
+                    buildUI.buildableOperatingCost = JSONManager.itemMods[i].operationCost;
 
                     buildUI.assignedButton = newButton.GetComponent<Button>();
                     buildUI.assignedObject = ItemManager.buildableModItems[i].gameObject;
+                    //buildUI.assignedObject = Singleton<BuildingController>.Instance.terminalPrefabs.hardFloor; // TESTING CODE ----------------------------------------------------------------------------
                     buildUI.assignedAnimator = newButton.GetComponent<Animator>();
 
                     buildUI.convertButtonToCustom();
 
                     newIcons.Add(newButton);
-                    ACEOCustomBuildables.Log("[Mod Success] Created UI button \"" + JSONManager.buildableMods[i].name + "\" successfully");
+                    ACEOCustomBuildables.Log("[Mod Success] Created UI button \"" + JSONManager.itemMods[i].name + "\" successfully");
                 }
                 catch (Exception ex)
                 {
-                    ACEOCustomBuildables.Log("[Mod Error] Creating UI button \"" + JSONManager.buildableMods[i].name + "\" failed. Error: " + ex.Message);
+                    ACEOCustomBuildables.Log("[Mod Error] Creating UI button \"" + JSONManager.itemMods[i].name + "\" failed. Error: " + ex.Message);
                 }
             }
 

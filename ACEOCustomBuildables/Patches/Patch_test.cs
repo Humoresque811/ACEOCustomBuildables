@@ -4,21 +4,18 @@ using System.Linq;
 using UnityEngine;
 using HarmonyLib;
 using TMPro;
+using PlacementStrategies;
 
 namespace ACEOCustomBuildables
 {
-    /*
-    [HarmonyPatch(typeof(GridManager), "AddObjectToMainGrid")]
+    
+    [HarmonyPatch(typeof(PlaceObjectSquareDrag), "PlaceObject")]
     static class Patch_test
     {
-        public static void Postfix(ApplicationVersionLabelUI __instance, Vector3[] borders)
+        // This is for testing flooring, coming in a future update! ----------------------------------------------------------------------------
+        /*public static void Postfix(PlaceObjectSquareDrag __instance, GameObject currentObject)
         {
-            ACEOCustomBuildables.Log("[Our test] It ran with: ");
-            for (int i = 0; i < borders.Length; i++)
-            {
-                ACEOCustomBuildables.Log(borders[i].ToString());
-            }
-            ACEOCustomBuildables.Log("out");
-        }
-    }*/
+            ACEOCustomBuildables.Log("3 " + currentObject.name);
+        }*/
+    }
 }

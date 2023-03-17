@@ -116,7 +116,7 @@ namespace ACEOCustomBuildables
             {
                 // Transfer vars and nessesary info
                 CustomItemSerializable returnItem = new CustomItemSerializable();
-                returnItem.modId = JSONManager.buildableMods[index].id;
+                returnItem.modId = JSONManager.itemMods[index].id;
                 returnItem.spriteRotation = Mathf.Round(item.transform.GetChild(0).GetChild(0).transform.eulerAngles.z);
                 returnItem.itemRotation = Mathf.Round(item.transform.eulerAngles.z);
 

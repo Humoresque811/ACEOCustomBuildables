@@ -25,7 +25,7 @@ namespace ACEOCustomBuildables
             {
                 try
                 {
-                    if (JSONManager.buildableMods[mod.index].useRandomRotation)
+                    if (JSONManager.itemMods[mod.index].useRandomRotation)
                     {
                         return true;
                     }

@@ -1,3 +1,25 @@
-This file is for displaying info, news and changelogs to your users.
-The text in this file is shown everytime a user installs the mod and starts the game,
-and everytime the mod is automatically updated by UMF. (If auto update is used.)
+Airport CEO Custom Buildables:
+
+ACEO Custom Buildables allows for you to add items to the game, from 
+* The Steam Workshop
+* The Native Mods Folder
+* A new folder in the LocalLow ACEO folder (for mod development)
+
+To access mods from the steam workshop, subscribe to them, enable them in the mod menu, and play. Everything should work fine without any direct interaction with the mod. The mod supports
+* Adding mods to a new game
+* Adding mods to a allready started game
+* Adding more mods at any time
+
+To remove mods:
+1. Go into game, remove every possible instance of an item that has been placed (or at least that you can find). 
+2. Save the game. 
+3. Then, and only then, remove the mod. 
+4. Load the game, and check the log file for any messages saying a "a custom item with the id in the save file doesn't exist". If this happens, the world hasn't ended, the item will just become a plant. It can be removed later, but the hitbox for removal will be wonky
+5. Keep having fun!
+
+Known Issues:
+* When the monetary unit is not dollars, the value does not adjust to the new currency, is still the raw input value
+* Using template tool will result in the item returning to a normal plant
+* May be unstable on Mac (I can't test!)
+
+Developed by Humoresque, with help from Zekew

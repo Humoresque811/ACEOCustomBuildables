@@ -31,7 +31,7 @@ namespace ACEOCustomBuildables
                 return;
             }
 
-            for (int i = 0; i < JSONManager.buildableMods.Count; i++)
+            for (int i = 0; i < JSONManager.itemMods.Count; i++)
             {
                 try
                 {
@@ -42,23 +42,30 @@ namespace ACEOCustomBuildables
                     newBuildable = Instantiate(template, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
 
                     newBuildable = convertPlaceableItemIntoCustom(newBuildable, i, 0);
-                    newBuildable.transform.GetChild(0).GetChild(0).localScale = calculateScale(newBuildable.transform.GetChild(0).GetChild(0).gameObject, i);
+
+                    // Do scaling
+                    Transform spritesParent = newBuildable.transform.GetChild(0);
+                    int x = JSONManager.itemMods[i].x;
+                    int y = JSONManager.itemMods[i].y;
+                    float multiplyer = JSONManager.itemMods[i].shadowTextureSizeMultiplier;
+                    spritesParent.GetChild(0).localScale = calculateScale(spritesParent.GetChild(0).gameObject, x, y); // texture
+                    spritesParent.GetChild(1).localScale = calculateScale(spritesParent.GetChild(1).gameObject, x * multiplyer, y * multiplyer); // shadow
 
                     if (newBuildable == null)
                     {
-                        ACEOCustomBuildables.Log("[Mod Error] New Buildable \"" + JSONManager.buildableMods[i].name + "\"is null!");
+                        ACEOCustomBuildables.Log("[Mod Error] New Buildable \"" + JSONManager.itemMods[i].name + "\"is null!");
                     }
 
                     buildableModItems.Add(newBuildable);
                     newBuildable.SetActive(false);
 
-                    ACEOCustomBuildables.Log("[Mod Success] Created buildable item \"" + JSONManager.buildableMods[i].name + "\" successfully");
+                    ACEOCustomBuildables.Log("[Mod Success] Created buildable item \"" + JSONManager.itemMods[i].name + "\" successfully");
 
                     newBuildable = null;
                 }
                 catch (Exception ex)
                 {
-                    ACEOCustomBuildables.Log("[Mod Error] Creating buildable \"" + JSONManager.buildableMods[i].name + "\" failed. Error: " + ex.Message);
+                    ACEOCustomBuildables.Log("[Mod Error] Creating buildable \"" + JSONManager.itemMods[i].name + "\" failed. Error: " + ex.Message);
                     itemsFailed = true;
                 }
             }
@@ -83,16 +90,27 @@ namespace ACEOCustomBuildables
 
                 convertPlaceableItemIntoCustom(item, index, itemRotation);
 
+                // Materials
                 GameObject sprite = item.transform.GetChild(0).GetChild(0).gameObject;
                 sprite.GetComponent<SpriteRenderer>().material = getSpriteNonLitMaterial(); // Sprite
                 item.transform.GetChild(1).GetChild(0).GetComponent<SpriteRenderer>().material = getSpriteNonLitMaterial(); // Overlay
                 item.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().material = getSpriteNonLitMaterial(); // Construction wireframe
+
+                // Rotation
                 if (!useRandomRotation)
                 {
                     sprite.transform.eulerAngles = new Vector3(0, 0, spriteRotation);
                 }
-                item.transform.GetChild(0).GetChild(0).localScale = calculateScale(item.transform.GetChild(0).GetChild(0).gameObject, index);
 
+                // For scaling the textures
+                Transform spritesParent = item.transform.GetChild(0);
+                int x = JSONManager.itemMods[index].x;
+                int y = JSONManager.itemMods[index].y;
+                float multiplyer = JSONManager.itemMods[index].shadowTextureSizeMultiplier;
+                spritesParent.GetChild(0).localScale = calculateScale(spritesParent.GetChild(0).gameObject, x, y); // texture
+                spritesParent.GetChild(1).localScale = calculateScale(spritesParent.GetChild(1).gameObject, x * multiplyer, y * multiplyer); // shadow
+
+                // Adjusting corners, since it's allready placed
                 item.transform.GetChild(2).GetChild(0).GetChild(0).transform.position += item.transform.position; // Neg Corner
                 item.transform.GetChild(2).GetChild(0).GetChild(1).transform.position += item.transform.position; // Pos Corner
                 item.transform.GetChild(2).GetChild(1).GetChild(0).transform.position += item.transform.position; // Neg Corner
@@ -130,47 +148,26 @@ namespace ACEOCustomBuildables
             texture.GetComponent<SpriteRenderer>().sprite = JSONManager.getSpriteFromPath(index, "Texture");
             shadow.GetComponent<SpriteRenderer>().sprite = JSONManager.getSpriteFromPath(index, "Shadow");
 
-            // Texture scaling
-            //texture.transform.localScale = calculateScale(texture, index);
-            /*int x = JSONManager.buildableMods[index].x;
-            int y = JSONManager.buildableMods[index].y;
-            if (x == y)
-            {
-                texture.transform.localScale = new Vector3(x, y, 1);
-                shadow.transform.localScale = new Vector3(x, y, 1);
-            }
-            else if (x > y)
-            {
-                texture.transform.localScale = new Vector3(y, y, 1);
-                shadow.transform.localScale = new Vector3(y, y, 1);
-            }
-            else if (x < y)
-            {
-                texture.transform.localScale = new Vector3(x, x, 1);
-                shadow.transform.localScale = new Vector3(x, x, 1);
-            }*/
-
             // Edit odd overlay thing (IDK what it does...?)
-            overlay.transform.GetChild(0).localScale = new Vector3(JSONManager.buildableMods[index].x, JSONManager.buildableMods[index].y, 1);
+            overlay.transform.GetChild(0).localScale = new Vector3(JSONManager.itemMods[index].x, JSONManager.itemMods[index].y, 1);
 
             // Changes the wireframe overlay appropriatly, making sure that it is in tiled mode
             SpriteRenderer wireframeSpriteRenderer = overlay.transform.GetChild(1).GetChild(0).GetChild(0).GetComponent<SpriteRenderer>();
             wireframeSpriteRenderer.drawMode = SpriteDrawMode.Tiled;
-            wireframeSpriteRenderer.size = new Vector2(JSONManager.buildableMods[index].x, JSONManager.buildableMods[index].y);
+            wireframeSpriteRenderer.size = new Vector2(JSONManager.itemMods[index].x, JSONManager.itemMods[index].y);
 
             GameObject boundary = item.transform.GetChild(2).gameObject;
             Vector3 negCorner;
             Vector3 posCorner;
             if (itemRotation == 0 || itemRotation == 180)
             {
-                negCorner = new Vector3((float)-Decimal.Divide(JSONManager.buildableMods[index].x, 2), (float)-Decimal.Divide(JSONManager.buildableMods[index].y, 2), 0); // Needs 90 degreee adjustment!!
-                posCorner = new Vector3((float)Decimal.Divide(JSONManager.buildableMods[index].x, 2), (float)Decimal.Divide(JSONManager.buildableMods[index].y, 2), 0);
+                negCorner = new Vector3((float)-Decimal.Divide(JSONManager.itemMods[index].x, 2), (float)-Decimal.Divide(JSONManager.itemMods[index].y, 2), 0); // Needs 90 degreee adjustment!!
+                posCorner = new Vector3((float)Decimal.Divide(JSONManager.itemMods[index].x, 2), (float)Decimal.Divide(JSONManager.itemMods[index].y, 2), 0);
             }
             else
             {
-                negCorner = new Vector3((float)-Decimal.Divide(JSONManager.buildableMods[index].y, 2), (float)-Decimal.Divide(JSONManager.buildableMods[index].x, 2), 0); // Needs 90 degreee adjustment!!
-                posCorner = new Vector3((float)Decimal.Divide(JSONManager.buildableMods[index].y, 2), (float)Decimal.Divide(JSONManager.buildableMods[index].x, 2), 0);
-
+                negCorner = new Vector3((float)-Decimal.Divide(JSONManager.itemMods[index].y, 2), (float)-Decimal.Divide(JSONManager.itemMods[index].x, 2), 0); // Needs 90 degreee adjustment!!
+                posCorner = new Vector3((float)Decimal.Divide(JSONManager.itemMods[index].y, 2), (float)Decimal.Divide(JSONManager.itemMods[index].x, 2), 0);
             }
 
             boundary.transform.GetChild(0).GetChild(0).transform.position = negCorner;
@@ -182,27 +179,27 @@ namespace ACEOCustomBuildables
             // Script related chagnes
             PlaceableItem newBuildablePI = item.GetComponent<PlaceableItem>();
             newBuildablePI.hasVariations = false;
-            newBuildablePI.objectName = JSONManager.buildableMods[index].name;
-            newBuildablePI.objectDescription = JSONManager.buildableMods[index].description;
-            newBuildablePI.objectCost = JSONManager.buildableMods[index].buildCost;
-            newBuildablePI.operationsCost = JSONManager.buildableMods[index].operationCost;
+            newBuildablePI.objectName = JSONManager.itemMods[index].name;
+            newBuildablePI.objectDescription = JSONManager.itemMods[index].description;
+            newBuildablePI.objectCost = JSONManager.itemMods[index].buildCost;
+            newBuildablePI.operationsCost = JSONManager.itemMods[index].operationCost;
             newBuildablePI.snapOffset = calculatOffest(index);
-            newBuildablePI.constructionEnergyRequired = JSONManager.buildableMods[index].constructionEnergy;
-            newBuildablePI.nbrOfContractorsPossible = JSONManager.buildableMods[index].contractors;
+            newBuildablePI.constructionEnergyRequired = JSONManager.itemMods[index].constructionEnergy;
+            newBuildablePI.nbrOfContractorsPossible = JSONManager.itemMods[index].contractors;
+            newBuildablePI.colorableSprites = new SpriteRenderer[0]; // Disables recoloring
 
             if (itemRotation == 0 || itemRotation == 180)
             {
-                newBuildablePI.objectGridSize = new Vector2(JSONManager.buildableMods[index].x, JSONManager.buildableMods[index].y);
+                newBuildablePI.objectGridSize = new Vector2(JSONManager.itemMods[index].x, JSONManager.itemMods[index].y);
             }
             else
             {
-                newBuildablePI.objectGridSize = new Vector2(JSONManager.buildableMods[index].y, JSONManager.buildableMods[index].x);
+                newBuildablePI.objectGridSize = new Vector2(JSONManager.itemMods[index].y, JSONManager.itemMods[index].x);
             }
-            //newBuildablePI.const
 
             // Where you can place it
             Enums.ItemPlacementArea itemPlacementArea;
-            bool parsedSuccsefully = Enum.TryParse<Enums.ItemPlacementArea>(JSONManager.buildableMods[index].itemPlacementArea, out itemPlacementArea);
+            bool parsedSuccsefully = Enum.TryParse<Enums.ItemPlacementArea>(JSONManager.itemMods[index].itemPlacementArea, out itemPlacementArea);
             if (parsedSuccsefully)
             {
                 newBuildablePI.itemPlacementArea = itemPlacementArea;
@@ -212,24 +209,35 @@ namespace ACEOCustomBuildables
                 newBuildablePI.itemPlacementArea = Enums.ItemPlacementArea.Both;
             }
 
+            // Shadow Stuff
+            if (item.transform.GetChild(0).GetChild(1).TryGetComponent<ShadowHandler>(out ShadowHandler shadowHandler))
+            {
+                shadowHandler.shadowDistance = JSONManager.itemMods[index].shadowDistance;
+                shadowHandler.SetShadowSprite(shadow.GetComponent<SpriteRenderer>().sprite);
+                shadowHandler.UpdateShadow();
+            }
+            else
+            {
+                ACEOCustomBuildables.Log("[Mod Error] There is no shadow handler...? Item: " + JSONManager.itemMods[index].name);
+            }
             return item;
         }
 
         private static Vector2 calculatOffest(int index)
         {
             Vector2 offset = Vector2.zero; 
-            if (JSONManager.buildableMods[index].x % 2 == 0)
+            if (JSONManager.itemMods[index].x % 2 == 0)
             {
                 offset.x = 0.5f;
             }
-            if (JSONManager.buildableMods[index].y % 2 == 0)
+            if (JSONManager.itemMods[index].y % 2 == 0)
             {
                 offset.y = 0.5f;
             }
             return offset;
         }
 
-        public static Vector3 calculateScale(GameObject texture, int index)
+        public static Vector3 calculateScale(GameObject texture, float x_input, float y_input)
         {
             Bounds textureBounds = texture.GetComponent<SpriteRenderer>().bounds;
             Vector2 bounds = new Vector2(textureBounds.size.x, textureBounds.size.y);
@@ -237,13 +245,13 @@ namespace ACEOCustomBuildables
             bounds.x = (float)Math.Round(bounds.x, 2);
             bounds.y = (float)Math.Round(bounds.y, 2);
 
-            int x = JSONManager.buildableMods[index].x;
-            int y = JSONManager.buildableMods[index].y;
+            float x = x_input;
+            float y = y_input;
 
             if (texture.transform.parent.parent.rotation.eulerAngles.z == 90 || texture.transform.parent.parent.rotation.eulerAngles.z == 270)
             {
-                x = JSONManager.buildableMods[index].y;
-                y = JSONManager.buildableMods[index].x;
+                x = y_input;
+                y = x_input;
             }
 
             float scaleValueX = 1f;

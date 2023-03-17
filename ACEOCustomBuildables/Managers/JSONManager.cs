@@ -3,152 +3,159 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.ConstrainedExecution;
 
 namespace ACEOCustomBuildables
 {
     class JSONManager : MonoBehaviour
     {
-        // Class
-        [System.Serializable]
-        public class buildableMod
-        {
-            //public string buildableType; //curently unused
-            public bool enabled;
-            public string name;
-            public string id;
-            public string description;
-            public int x;
-            public int y;
-            public string texturePath;
-            public string shadowPath;
-            public string iconPath;
-            public int buildCost;
-            public int operationCost;
-            public bool bogusOverride;
-            public string itemPlacementArea;
-            public bool useRandomRotation;
-            public int constructionEnergy;
-            public int contractors;
-        }
-
-
         //Setup Variables
-        public static List<buildableMod> buildableMods = new List<buildableMod>();
+        public static List<itemMod> itemMods = new List<itemMod>();
+        public static List<floorMod> floorMods = new List<floorMod>();
+        public static List<string> modPaths = new List<string>();
         public static string basePath = "";
+        public static readonly string basePathAddativeItems = "\\Buildables\\Items"; // This will require changing eventually, as there will be multiple
 
         public static void importJSON()
         {
-            // intitial checks
-            if (string.IsNullOrEmpty(basePath))
+            // Clears mods
+            itemMods = new List<itemMod>();
+            floorMods = new List<floorMod>();
+            ItemManager.buildableModItems = new List<GameObject>();
+
+            importJSONFromFolder(basePath);
+
+            if (modPaths.Count <= 0)
             {
-                ACEOCustomBuildables.Log("[mod Error] The base path is empty or null... ");
-                return;
-            }
-            if (!Directory.Exists(basePath))
-            {
-                ACEOCustomBuildables.Log("[Mod Error] There is no directory at the base path...");
+                ACEOCustomBuildables.Log("[Mod Success] (re-)Imported " + JSONManager.itemMods.Count + " JSON file(s) from just the buildables folder");
                 return;
             }
 
+            for (int i = 0; i < modPaths.Count; i++)
+            {
+                importJSONFromFolder(modPaths[i]);
+            }
+            ACEOCustomBuildables.Log("[Mod Success] (re-)Imported " + JSONManager.itemMods.Count + " JSON file(s) from mods and the buildables folder");
+
+            modPaths = new List<string>();
+        }
+
+        private static void importJSONFromFolder(string path = "")
+        {
+            bool giveUsePath = false;
+            if (string.IsNullOrEmpty(path))
+            {
+                path = basePath;
+            }
+            else
+            {
+                giveUsePath = true;
+            }
+
+            // Intitial checks
+            if (string.IsNullOrEmpty(path))
+            {
+                ACEOCustomBuildables.Log("[Mod Error] The path is empty or null... ");
+                return;
+            }
+            if (!Directory.Exists(path))
+            {
+                ACEOCustomBuildables.Log("[Mod Error] There is no directory at the path...");
+                return;
+            }
+
+            // Get JSON files in the given folder
             string[] jsonFilePaths = new string[1];
-
             try
             {
-                jsonFilePaths = Directory.GetFiles(basePath, "*.json");
+                jsonFilePaths = Directory.GetFiles(path, "*.json");
             }
             catch (Exception ex)
             {
                 ACEOCustomBuildables.Log("[Mod Error] Couldn't get JSON file paths... Error: " + ex.ToString());
+                return;
             }
 
-            // Clears mods
-            buildableMods = new List<buildableMod>();
-            ItemManager.buildableModItems = new List<GameObject>();
-
-            // Re-adds mods
+            // Adds mods
             for (int i = 0; i < jsonFilePaths.Length; i++)
             {
-                if (getJsonString(jsonFilePaths[i]) != null)
+                if (getJSONFileContent(jsonFilePaths[i]) == null)
                 {
-                    buildableMod test = JsonUtility.FromJson<buildableMod>(getJsonString(jsonFilePaths[i]));
-                    if (test.enabled == true)
-                    {
-                        buildableMods.Add(new buildableMod());
-                        resetBuildableModInfo(buildableMods.Count - 1);
-                        buildableMods[buildableMods.Count - 1] = JsonUtility.FromJson<buildableMod>(getJsonString(jsonFilePaths[i]));
-                        string dialog = bogusNumberScanner(buildableMods.Count - 1);
-                        if (!string.IsNullOrEmpty(dialog))
-                        {
-                            DialogPanel.Instance.ShowMessagePanel(dialog, Color.black);
-                        }
-                    }
+                    ACEOCustomBuildables.Log("[Mod Error] JSON File Paths is null!");
+                    return;
+                }
+
+                // Make sure the mod being added is enabled
+                itemMod preLoadedMod = JsonUtility.FromJson<itemMod>(getJSONFileContent(jsonFilePaths[i]));
+                if (preLoadedMod.enabled != true)
+                {
+                    continue;
+                }
+
+                // This is an old system that does not work as intended, but doesn't hurt anything, so it is staying for now
+                itemMods.Add(new itemMod());
+                itemMods[itemMods.Count - 1] = JsonUtility.FromJson<itemMod>(getJSONFileContent(jsonFilePaths[i]));
+
+                if (giveUsePath)
+                {
+                    itemMods[itemMods.Count - 1].pathToUse = path;
+                }
+                else
+                {
+                    itemMods[itemMods.Count - 1].pathToUse = "";
+                }
+
+                // Bogus system is called
+                string dialog = bogusNumberScanner(itemMods.Count - 1);
+                if (!string.IsNullOrEmpty(dialog))
+                {
+                    DialogPanel.Instance.ShowMessagePanel(dialog, Color.black);
                 }
             }
 
             // Checks
-            for (int i = 0; i < buildableMods.Count; i++)
+            for (int i = 0; i < itemMods.Count; i++)
             {
-                for (int k = 0; k < buildableMods.Count; k++)
+                for (int k = 0; k < itemMods.Count; k++)
                 {
-                    if (i != k)
+                    if (i == k)
                     {
-                        if (buildableMods[i].id == buildableMods[k].id)
-                        {
-                            ACEOCustomBuildables.Log("[Buildable Error] You have two mods with the same id... This will result in problems with saveload, so the mod called " +
-                                buildableMods[k].name + " with id " + buildableMods[k].id + " was removed.");
-                            DialogPanel.Instance.ShowMessagePanel("[Airport CEO Custom Buildables] Your mod \"" + buildableMods[k].name + "\" has a duclicate id to mod \"" + buildableMods[i].name + "\", so the first mod wasn't loaded.", Color.black);
-                            buildableMods.RemoveAt(i);
-                            break;
-                        }
+                        continue;
                     }
+
+                    if (itemMods[i].id != itemMods[k].id)
+                    {
+                        continue;
+                    } 
+
+                    ACEOCustomBuildables.Log("[Buildable Error] You have two mods with the same id... This will result in problems with saveload, so the mod called " +
+                        itemMods[k].name + " with id " + itemMods[k].id + " was removed.");
+                    DialogPanel.Instance.ShowMessagePanel("[Airport CEO Custom Buildables] Your mod \"" + itemMods[k].name + "\" has a duclicate id to mod \"" + itemMods[i].name + "\", so the first mod wasn't loaded.", Color.black);
+                    itemMods.RemoveAt(i);
+                    break;
                 }
             }
-            ACEOCustomBuildables.Log("[Mod Success] (re-)Imported " + JSONManager.buildableMods.Count + " JSON file(s)");
         }
 
-        private static string getJsonString(string path)
+        private static string getJSONFileContent(string path)
         {
-            if (File.Exists(path))
+            if (!File.Exists(path))
             {
-                using (StreamReader reader = new StreamReader(path))
-                {
-                    return reader.ReadToEnd();
-                }
-            }
-            else
-            {
-                ACEOCustomBuildables.Log("[Mod Error] Nothing at search path!");
+                ACEOCustomBuildables.Log("[Mod Error] Nothing at getJSONFileContent's provided search path!");
                 return null;
             }
+
+            // We know the file exists now!
+            using (StreamReader reader = new StreamReader(path))
+            {
+                return reader.ReadToEnd();
+            }
         }
 
-
-        private static void resetBuildableModInfo(int index)
-        {
-            buildableMod mod = buildableMods[index];
-            mod.name = "Deafult Buildable Name";
-            mod.description = "";
-            mod.id = "";
-            mod.enabled = true;
-            mod.x = 1;
-            mod.y = 1;
-            mod.texturePath = "";
-            mod.shadowPath = "";
-            mod.iconPath = "";
-            mod.buildCost = 10;
-            mod.operationCost = 10;
-            mod.bogusOverride = false;
-            mod.itemPlacementArea = "Both";
-            mod.useRandomRotation = false;
-            mod.constructionEnergy = 50;
-            mod.contractors = 1;
-        }
 
         private static string bogusNumberScanner(int index)
         {
             // For shorter reference
-            buildableMod mod = buildableMods[index];
+            itemMod mod = itemMods[index];
             string dialog;
 
             // These are the important ones in which case the mod needs to be removed
@@ -156,29 +163,7 @@ namespace ACEOCustomBuildables
             {
                 ACEOCustomBuildables.Log("[Buildable Problem] Your mod called \"" + mod.name + "\" seems to have a negative int value. This may break the game, so the mod has not been loaded.");
                 dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a negative int value, so it wasn't loaded.";
-                buildableMods.RemoveAt(index);
-                return dialog;
-            }
-            if (mod.bogusOverride)
-            {
-                return "";
-            }
-
-            // I don't want people using big numbers, so I won't let them unless they know coding and can read this file or they ask me. Then I trust them.
-            if (mod.x > 16)
-            {
-                ACEOCustomBuildables.Log("[Buildable Problem] Your mod called \"" + mod.name + "\" seems to have a high \"x\" value. " +
-                    "This may break the game, so the mod has not been loaded. Contact Humoresque if you think your mod should work. Sorry!");
-                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has too high of a \"x\" value, so it wasn't loaded.";
-                buildableMods.RemoveAt(index);
-                return dialog;
-            }
-            if (mod.y > 16)
-            {
-                ACEOCustomBuildables.Log("[Buildable Problem] Your mod called \"" + mod.name + "\" seems to have a high \"y\" value. " +
-                "This may break the game, so the mod has not been loaded. Contact Humoresque if you think your mod should work. Sorry!");
-                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has too high of a \"y\" value, so it wasn't loaded.";
-                buildableMods.RemoveAt(index);
+                itemMods.RemoveAt(index);
                 return dialog;
             }
 
@@ -192,27 +177,41 @@ namespace ACEOCustomBuildables
             }
             if (mod.constructionEnergy > 5000)
             {
-                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a too high construction energy value, so it was changed to 50.");
-                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a too high construction energy value, so it was changed to 50.";
-                mod.constructionEnergy = 50;
+                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a too high construction energy value, so it was changed to 500.");
+                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a too high construction energy value, so it was changed to 500.";
+                mod.constructionEnergy = 500;
                 return dialog;
             }
 
-            if (mod.constructionEnergy <= 0)
+            if (mod.contractors <= 0)
             {
                 ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a contracters value below or at 0, so it was changed to 1");
                 dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a contracters value below or at 0, so it was changed to 1.";
                 mod.contractors = 1;
                 return dialog;
             }
-            if (mod.constructionEnergy > 5000)
+            if (mod.contractors > 100)
             {
-                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a too high contractors value, so it was changed to 1.");
-                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a too high contractors value, so it was changed to 1.";
-                mod.contractors = 1;
+                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a too high contractors value, so it was changed to 100.");
+                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a too high contractors value, so it was changed to 100.";
+                mod.contractors = 100;
                 return dialog;
             }
 
+            if (mod.shadowDistance < 0)
+            {
+                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a shadowDistance value below 0, so it was changed to 0");
+                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a shadowDistance value below 0, so it was changed to 0.";
+                mod.shadowDistance = 0;
+                return dialog;
+            }
+            if (mod.shadowTextureSizeMultiplier < 1)
+            {
+                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a shadowMultiplier value below 1, so it was changed to 1.");
+                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a shadowMultiplier value below 1, so it was changed to 1.";
+                mod.shadowTextureSizeMultiplier = 1;
+                return dialog;
+            }
 
 
             // Non critical, both is assumed. Just for good measure
@@ -230,6 +229,31 @@ namespace ACEOCustomBuildables
                 return dialog;
             }
 
+            // X and Y are not always enforced
+            if (mod.bogusOverride)
+            {
+                return "";
+            }
+
+
+            // I don't want people using big numbers, so I won't let them unless they know coding and can read this file or they ask me. Then I trust them.
+            if (mod.x > 16)
+            {
+                ACEOCustomBuildables.Log("[Buildable Problem] Your mod called \"" + mod.name + "\" seems to have a high \"x\" value. " +
+                    "This may break the game, so the mod has not been loaded. Contact Humoresque if you think your mod should work. Sorry!");
+                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has too high of a \"x\" value, so it wasn't loaded.";
+                itemMods.RemoveAt(index);
+                return dialog;
+            }
+            if (mod.y > 16)
+            {
+                ACEOCustomBuildables.Log("[Buildable Problem] Your mod called \"" + mod.name + "\" seems to have a high \"y\" value. " +
+                "This may break the game, so the mod has not been loaded. Contact Humoresque if you think your mod should work. Sorry!");
+                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has too high of a \"y\" value, so it wasn't loaded.";
+                itemMods.RemoveAt(index);
+                return dialog;
+            }
+
             return "";
         }
 
@@ -241,11 +265,11 @@ namespace ACEOCustomBuildables
         /// <param name="spriteType">What type of sprite to get ("Texture", "Shadow", or "Icon")</param>
         /// <param name="modClass">A mod class to use instead of mod index</param>
         /// <returns>The loaded Sprite, or a placeholder sprite if an error was encountered</returns>
-        public static Sprite getSpriteFromPath(int modIndex, string spriteType, buildableMod modClass = null)
+        public static Sprite getSpriteFromPath(int modIndex, string spriteType, itemMod modClass = null)
         {
             // Local Vars
-            string path = basePath + "\\";
-            buildableMod modClassToUse;
+            itemMod modClassToUse;
+            string path;
 
             // Determine which class to use
             if (modClass != null)
@@ -254,7 +278,17 @@ namespace ACEOCustomBuildables
             }
             else
             {
-                modClassToUse = JSONManager.buildableMods[modIndex];
+                modClassToUse = JSONManager.itemMods[modIndex];
+            }
+            
+            // Determine if workshop or not and then use correct path
+            if (string.IsNullOrEmpty(modClassToUse.pathToUse))
+            {
+                path = basePath + "\\";
+            }
+            else
+            {
+                path = modClassToUse.pathToUse + "\\";
             }
 
             // Determine which texture to use
@@ -264,7 +298,14 @@ namespace ACEOCustomBuildables
             }
             else if (spriteType == "Shadow")
             {
-                path += modClassToUse.shadowPath;
+                if (string.Equals(modClassToUse.shadowPath, "autogenerate"))
+                {
+                    path += modClassToUse.texturePath;
+                }
+                else
+                {
+                    path += modClassToUse.shadowPath;
+                }
             }
             else if (spriteType == "Icon")
             {
@@ -275,6 +316,7 @@ namespace ACEOCustomBuildables
                 // Return the Fallback image
                 return Singleton<DataPlaceholderItems>.Instance.smallPlantIcon;
             }
+            ACEOCustomBuildables.Log(path);
 
             // If texture keyword correct, then check if it exists
             if (File.Exists(path))

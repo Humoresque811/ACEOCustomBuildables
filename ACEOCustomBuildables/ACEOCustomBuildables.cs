@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace ACEOCustomBuildables
 {
-    [UMFHarmony(9)] //Set this to the number of harmony patches in your mod.
+    [UMFHarmony(10)] //Set this to the number of harmony patches in your mod.
     [UMFScript]
     class ACEOCustomBuildables : MonoBehaviour
     {

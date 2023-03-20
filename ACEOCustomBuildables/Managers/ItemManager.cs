@@ -77,6 +77,7 @@ namespace ACEOCustomBuildables
 
         public static void convertItemToCustom(GameObject item, int index, bool useRandomRotation, float spriteRotation, float itemRotation)
         {
+            string internalLog = ""; // This is for logging, to show how far the code has got. Will only be logged upon a code failure
             try
             {
                 if (item == null || index <= -1)
@@ -87,20 +88,24 @@ namespace ACEOCustomBuildables
 
                 PlaceableItem pli = item.GetComponent<PlaceableItem>();
                 SingletonNonDestroy<GridController>.Instance.RemoveReferenceFromMainGrid(pli.GetAllBorderPositions(), pli.ReferenceBytes);
+                internalLog += "\nFinished pre-converstion edits";
 
                 convertPlaceableItemIntoCustom(item, index, itemRotation);
+                internalLog += "\nFinsihed conversion";
 
                 // Materials
                 GameObject sprite = item.transform.GetChild(0).GetChild(0).gameObject;
                 sprite.GetComponent<SpriteRenderer>().material = getSpriteNonLitMaterial(); // Sprite
                 item.transform.GetChild(1).GetChild(0).GetComponent<SpriteRenderer>().material = getSpriteNonLitMaterial(); // Overlay
                 item.transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().material = getSpriteNonLitMaterial(); // Construction wireframe
+                internalLog += "\nFinished material changes";
 
                 // Rotation
                 if (!useRandomRotation)
                 {
                     sprite.transform.eulerAngles = new Vector3(0, 0, spriteRotation);
                 }
+                internalLog += "\nFinished rotation changes";
 
                 // For scaling the textures
                 Transform spritesParent = item.transform.GetChild(0);
@@ -109,19 +114,25 @@ namespace ACEOCustomBuildables
                 float multiplyer = JSONManager.itemMods[index].shadowTextureSizeMultiplier;
                 spritesParent.GetChild(0).localScale = calculateScale(spritesParent.GetChild(0).gameObject, x, y); // texture
                 spritesParent.GetChild(1).localScale = calculateScale(spritesParent.GetChild(1).gameObject, x * multiplyer, y * multiplyer); // shadow
+                internalLog += "\nFinished texture scaling";
 
                 // Adjusting corners, since it's allready placed
                 item.transform.GetChild(2).GetChild(0).GetChild(0).transform.position += item.transform.position; // Neg Corner
                 item.transform.GetChild(2).GetChild(0).GetChild(1).transform.position += item.transform.position; // Pos Corner
                 item.transform.GetChild(2).GetChild(1).GetChild(0).transform.position += item.transform.position; // Neg Corner
                 item.transform.GetChild(2).GetChild(1).GetChild(1).transform.position += item.transform.position; // pos Corner
+                internalLog += "\nFinished corner pos edits";
 
                 GridManager.AddObjectToMainGrid(pli.GetAllBorderPositions(), pli.boundary.penalty, pli.ReferenceBytes);
                 GridManager.UpdateWalkableStatusOnPositions(pli.GetAllBorderPositions());
+                internalLog += "\nFinished grid updates";
             }
             catch (Exception ex)
             {
-                ACEOCustomBuildables.Log("[Mod Error] Error converting an item to custom. Error: " + ex.Message);
+                ACEOCustomBuildables.Log("[Mod Error] An error occured while converting an item to custom. Info:" +
+                    "\nError: " + ex.Message + 
+                    "\nCustomItemName: " + JSONManager.itemMods[index].name + ", postion: " + item.transform.position.ToString() + 
+                    "\nError Debug Log: " + internalLog);
             }
         }
 

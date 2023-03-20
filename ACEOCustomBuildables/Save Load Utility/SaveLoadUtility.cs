@@ -7,6 +7,7 @@ using System.IO;
 using Nodes;
 using System.Net;
 using Newtonsoft.Json;
+using System.Security.Cryptography;
 
 namespace ACEOCustomBuildables
 {
@@ -134,20 +135,6 @@ namespace ACEOCustomBuildables
                 return null;
             }
         }
-
-        /*public static float adjustFloatToRightDegreeIncrements(float input)
-        {
-            float output;
-
-            if (input == 0 || input == 90 || input == 180 || input == 270)
-            {
-                return input;
-            }
-
-            Mathf.LerpAngle()
-            return output;
-        }*/
-
 
         // JSON making!
         /// <summary>

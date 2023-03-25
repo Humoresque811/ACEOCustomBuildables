@@ -111,7 +111,6 @@ namespace ACEOCustomBuildables.Patches
                     if (!string.Equals(worldItem.ReferenceID, customItem.referenceID))
                     {
                         SaveLoadUtility.quicklog("What? The reference ID is different, but the postion and floor are the same? huh?", true);
-                        continue;
                     }
 
                     // We know now that they are the same! We need to find the index of the mod from the id now
@@ -143,6 +142,8 @@ namespace ACEOCustomBuildables.Patches
                     }
                 }
             }
+
+            Singleton<SceneMessagePanelUI>.Instance.SetLoadingText(LocalizationManager.GetLocalizedValue("SaveLoadGameDataController.cs.key.almost-done"), 100);
             SaveLoadUtility.quicklog("Custom items finished loading, without any errors!", true);
         }
 

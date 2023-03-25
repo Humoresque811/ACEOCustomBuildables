@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using HarmonyLib;
 
 namespace ACEOCustomBuildables
 {
@@ -116,6 +117,7 @@ namespace ACEOCustomBuildables
                 spritesParent.GetChild(1).localScale = calculateScale(spritesParent.GetChild(1).gameObject, x * multiplyer, y * multiplyer); // shadow
                 internalLog += "\nFinished texture scaling";
 
+
                 // Adjusting corners, since it's allready placed
                 item.transform.GetChild(2).GetChild(0).GetChild(0).transform.position += item.transform.position; // Neg Corner
                 item.transform.GetChild(2).GetChild(0).GetChild(1).transform.position += item.transform.position; // Pos Corner
@@ -123,9 +125,30 @@ namespace ACEOCustomBuildables
                 item.transform.GetChild(2).GetChild(1).GetChild(1).transform.position += item.transform.position; // pos Corner
                 internalLog += "\nFinished corner pos edits";
 
+                // Grid updates and changes
+                pli.SetZOnFloor();  
+                pli.ShouldShowOnFloor(pli.Floor);
                 GridManager.AddObjectToMainGrid(pli.GetAllBorderPositions(), pli.boundary.penalty, pli.ReferenceBytes);
                 GridManager.UpdateWalkableStatusOnPositions(pli.GetAllBorderPositions());
                 internalLog += "\nFinished grid updates";
+
+
+                // Changes for multi-floor stuff - sprite
+                pli.CheckIfPlacedInside();
+                pli.ShowHide(FloorManager.currentFloor);
+
+                // Multi-Floor changes for overlay - Order matters, above MUST be done first.
+                pli.overlay.UpdateOverlaySpriteMaterial(pli.isInside);
+                if (pli.isInside)
+                {
+                    Traverse.Create(pli.overlay).Field<SpriteRenderer>("mainOverlaySprite").Value.sortingLayerName = "SpriteOverlay";
+                    Traverse.Create(pli.overlay).Field<SpriteRenderer>("constructionOverlaySprite").Value.sortingLayerName = "SpriteOverlay";
+                }
+                else
+                {
+                    pli.overlay.SetOverlayLayerToStructureOutside();
+                }
+                internalLog += "\nFinished Multi-Floor edits";
             }
             catch (Exception ex)
             {

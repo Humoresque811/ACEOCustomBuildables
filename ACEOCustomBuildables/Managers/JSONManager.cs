@@ -35,8 +35,6 @@ namespace ACEOCustomBuildables
                 importJSONFromFolder(modPaths[i]);
             }
             ACEOCustomBuildables.Log("[Mod Success] (re-)Imported " + JSONManager.itemMods.Count + " JSON file(s) from mods and the buildables folder");
-
-            modPaths = new List<string>();
         }
 
         private static void importJSONFromFolder(string path = "")

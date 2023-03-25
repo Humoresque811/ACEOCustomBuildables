@@ -9,13 +9,19 @@ using PlacementStrategies;
 namespace ACEOCustomBuildables
 {
     
-    [HarmonyPatch(typeof(PlaceObjectSquareDrag), "PlaceObject")]
+    //[HarmonyPatch(typeof(OverlayHandler), "ToggleConstructionOverlay")]
     static class Patch_test
     {
-        // This is for testing flooring, coming in a future update! ----------------------------------------------------------------------------
-        /*public static void Postfix(PlaceObjectSquareDrag __instance, GameObject currentObject)
+        // This is a patch for various tests (generally for buggixes)! ----------------------------------------------------------------------------
+        /*public static void Postfix(OverlayHandler __instance, bool status)
         {
-            ACEOCustomBuildables.Log("3 " + currentObject.name);
+            PlaceableItem item;
+            __instance.transform.parent.TryGetComponent<PlaceableItem>(out item);
+            if (item != null)
+            {
+                ACEOCustomBuildables.Log("test status is " + status.ToString() + " on item " + item.ObjectName);
+                ACEOCustomBuildables.Log("1st traverse result is " + Traverse.Create(__instance).Field<SpriteRenderer>("constructionOverlaySprite").Value.enabled.ToString());
+            }
         }*/
     }
 }

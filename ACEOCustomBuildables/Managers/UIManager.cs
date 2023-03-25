@@ -17,8 +17,8 @@ namespace ACEOCustomBuildables
             for (int i = 0; i < newIcons.Count; i++)
             {
                 Destroy(newIcons[i]);
-                newIcons.RemoveAt(i);
             }
+            newIcons = new List<GameObject>();
             UICreated = false;
         }
 

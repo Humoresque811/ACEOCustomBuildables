@@ -11,28 +11,13 @@ using LapinerTools.Steam.Data;
 namespace ACEOCustomBuildables
 {
     
-    [HarmonyPatch(typeof(ModManager), "QueueMods")]
+    [HarmonyPatch(typeof(ModManager), "InitalizeSteamWorkshopMods")]
     static class Patch_StartWorkshopLoading
     {   
-        public static void Postfix(string path)
+        public static void Prefix()
         {
-            string[] directories = Directory.GetDirectories(path);
-            for (int i = 0; i < directories.Length; i++)
-            {
-                // Is there a subfolder with Buildables?
-                if (!directories[i].SafeSubstring(directories[i].Length - 10, 10).Equals("Buildables"))
-                {
-                    continue;
-                }
-                ACEOCustomBuildables.Log("[Mod Nuetral] Started loading a mod from the workshop!");
-
-                string fullPath = path + JSONManager.basePathAddativeItems; // Code accodomates future changes to the folder
-                if (Workshoputility.checkIfFolderValid(fullPath))
-                {
-                    JSONManager.modPaths.Add(fullPath);
-                    continue;
-                }
-            }
+            ACEOCustomBuildables.Log("[Mod Nuetral] Started Loading workshop mods!");
+            JSONManager.modPaths = new List<string>(); // Clears list to avoid duplicates
         }
     }
 }

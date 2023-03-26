@@ -24,7 +24,7 @@ namespace ACEOCustomBuildables
                 }
                 ACEOCustomBuildables.Log("[Mod Nuetral] Started loading a mod from the workshop!");
 
-                string fullPath = path + JSONManager.basePathAddativeItems; // Code accodomates future changes to the folder
+                string fullPath = Path.Combine(path, JSONManager.pathAddativeBase, JSONManager.pathAddativeItems); // Code accodomates future changes to the folder
                 if (Workshoputility.checkIfFolderValid(fullPath))
                 {
                     JSONManager.modPaths.Add(fullPath);

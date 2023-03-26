@@ -154,7 +154,7 @@ namespace ACEOCustomBuildables
             string basepath = Singleton<SaveLoadGameDataController>.Instance.GetUserSavedDataSearchPath();
             if (!string.Equals(path.SafeSubstring(0, 2), "C:"))
             {
-                path = basepath.Remove(basepath.Length - 1) + "\\" + path;
+                path = Path.Combine(basepath.Remove(basepath.Length - 1), path);
             }
 
             // Make sure the directory does exist
@@ -165,7 +165,7 @@ namespace ACEOCustomBuildables
             }
 
             // Add the filename itself
-            path = path + "\\" + fileName;
+            path = Path.Combine(path, fileName);
             quicklog("Full path is \"" + path + "\"", false);
 
             // Make sure the file doesn't allready exist

@@ -13,7 +13,8 @@ namespace ACEOCustomBuildables
         public static List<floorMod> floorMods = new List<floorMod>();
         public static List<string> modPaths = new List<string>();
         public static string basePath = "";
-        public static readonly string basePathAddativeItems = "\\Buildables\\Items"; // This will require changing eventually, as there will be multiple
+        public static readonly string pathAddativeBase = "Buildables";
+        public static readonly string pathAddativeItems = "Items"; // This will require changing eventually, as there will be multiple
 
         public static void importJSON()
         {
@@ -299,11 +300,12 @@ namespace ACEOCustomBuildables
             // Determine if workshop or not and then use correct path
             if (string.IsNullOrEmpty(modClassToUse.pathToUse))
             {
-                path = basePath + "\\";
+                path = basePath + Path.DirectorySeparatorChar;
+                
             }
             else
             {
-                path = modClassToUse.pathToUse + "\\";
+                path = modClassToUse.pathToUse + Path.DirectorySeparatorChar;
             }
 
             // Determine which texture to use

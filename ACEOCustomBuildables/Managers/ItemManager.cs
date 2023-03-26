@@ -146,6 +146,7 @@ namespace ACEOCustomBuildables
                 }
                 else
                 {
+                    // Nessesary idk, but just in case ;)
                     pli.overlay.SetOverlayLayerToStructureOutside();
                 }
                 internalLog += "\nFinished Multi-Floor edits";

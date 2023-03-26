@@ -34,7 +34,7 @@ namespace ACEOCustomBuildables
         {
             try
             {
-                string path = Application.persistentDataPath + JSONManager.basePathAddativeItems;
+                string path = Path.Combine(Application.persistentDataPath, JSONManager.pathAddativeBase, JSONManager.pathAddativeItems);
                 Utils.CreateFolderIfNotExist(path);
                 ACEOCustomBuildables.Log("[Mod Success] Got/Created buildable folder");
                 JSONManager.basePath = path;

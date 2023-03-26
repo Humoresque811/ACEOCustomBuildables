@@ -10,7 +10,7 @@ namespace ACEOCustomBuildables
     public class ACEOCustomBuildablesConfig
     {
         private static readonly string configVersion = "1.0";
-        public static string displayConfigVersion = "v1.0";
+        public static string displayConfigVersion = "v1.0.1";
 
         //Add your config vars here.
         public static bool disableRandomRotation = false;
@@ -36,6 +36,7 @@ namespace ACEOCustomBuildables
                     cfg.Write("MaxVersion", new UMFConfigString("0.54.99999.99999")); //This will prevent the mod from being loaded after the next major UMF release
                     cfg.Write("UpdateURL", new UMFConfigString(""));
                     cfg.Write("ConfigVersion", new UMFConfigString(configVersion));
+                    cfg.Write("UpdateURL", new UMFConfigString("https://umodframework.com/updatemod?id=36"));
 
                     ACEOCustomBuildables.Log("Finished UMF Settings.");
 

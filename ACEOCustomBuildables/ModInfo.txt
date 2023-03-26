@@ -23,3 +23,12 @@ Known Issues:
 * May be unstable on Mac (I can't test!)
 
 Developed by Humoresque, with help from Zekew
+
+Changelog:
+1.0.1
+* Bug Fix: Fixed paths not working on mac
+
+1.0:
+* Epic: All basic systems work
+* Feature: Steam Workshop downloading option
+* Feature: Save - Load compatability

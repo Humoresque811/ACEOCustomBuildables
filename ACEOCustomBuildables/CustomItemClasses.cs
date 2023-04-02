@@ -46,7 +46,6 @@ namespace ACEOCustomBuildables
     [System.Serializable]
     public class itemMod
     {
-        //public string buildableType; //curently unused, future usage depends on how the buildables file structure will be set up
         public bool enabled;
         public string name;
         public string id;

@@ -174,8 +174,11 @@ namespace ACEOCustomBuildables
             itemMod mod = itemMods[index];
             string dialog;
 
+            Action<string> Logger = new Action<string>(Log);
+            InputCheckerHelper.CheckItemMod(itemMods[index], Logger);
+
             // These are the important ones in which case the mod needs to be removed
-            if (mod.x < 0 || mod.y < 0 || mod.operationCost < 0 || mod.buildCost < 0)
+            /*if (mod.x < 0 || mod.y < 0 || mod.operationCost < 0 || mod.buildCost < 0)
             {
                 ACEOCustomBuildables.Log("[Buildable Problem] Your mod called \"" + mod.name + "\" seems to have a negative int value. This may break the game, so the mod has not been loaded.");
                 dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a negative int value, so it wasn't loaded.";
@@ -228,7 +231,7 @@ namespace ACEOCustomBuildables
                 mod.shadowTextureSizeMultiplier = 1;
                 return dialog;
             }
-
+            */
 
             // Non critical, both is assumed. Just for good measure
             bool correctItemPlacementAreaInput = false;
@@ -246,7 +249,7 @@ namespace ACEOCustomBuildables
             }
 
             // X and Y are not always enforced
-            if (mod.bogusOverride)
+            /*if (mod.bogusOverride)
             {
                 return "";
             }
@@ -269,7 +272,7 @@ namespace ACEOCustomBuildables
                 itemMods.RemoveAt(index);
                 return dialog;
             }
-
+            */
             return "";
         }
 
@@ -288,14 +291,7 @@ namespace ACEOCustomBuildables
             string path;
 
             // Determine which class to use
-            if (modClass != null)
-            {
-                modClassToUse = modClass;
-            }
-            else
-            {
-                modClassToUse = JSONManager.itemMods[modIndex];
-            }
+            modClassToUse = modClass ?? JSONManager.itemMods[modIndex];
             
             // Determine if workshop or not and then use correct path
             if (string.IsNullOrEmpty(modClassToUse.pathToUse))
@@ -343,6 +339,11 @@ namespace ACEOCustomBuildables
 
             // If it doesn't exist, return this
             return Singleton<DataPlaceholderItems>.Instance.smallPlantIcon;
+        }
+
+        private static void Log(string message)
+        {
+            ACEOCustomBuildables.Log(message);
         }
 	}
 }

@@ -29,13 +29,13 @@ namespace ACEOCustomBuildables
                 try
                 {
                     // Get template
-                    GameObject panel = TemplateManager.UITemplate;
-
+                    GameObject panel = TemplateManager.UIPanels[JSONManager.itemMods[i].buildMenu];
+                    
                     // UI Creation
-                    GameObject button = panel.transform.GetChild(2).GetChild(1).gameObject;
+                    GameObject button = TemplateManager.UIPanels["DecorationViewport"].transform.GetChild(0).gameObject;
                     GameObject newButton = Instantiate(button, Vector3.zero, button.transform.rotation);
-                    newButton.name = "CustomItem " + i;
-                    newButton.transform.SetParent(panel.transform.GetChild(2));
+                    newButton.name = $"CustomItem {i}";
+                    newButton.transform.SetParent(panel.transform);
                     newButton.transform.GetChild(0).GetComponent<Image>().sprite = JSONManager.getSpriteFromPath(i, "Icon");
                     Destroy(newButton.GetComponent<BuildButtonAssigner>());
                     Destroy(newButton.GetComponent<BuildButtonTextManager>());

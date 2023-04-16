@@ -5,19 +5,18 @@ using System.Collections.Generic;
 using System.IO;
 using HarmonyLib;
 using Newtonsoft.Json;
-using static ACEOCustomBuildables.JSONManager;
 
-namespace ACEOCustomBuildables.Patches
+namespace ACEOCustomBuildables
 {
     [HarmonyPatch(typeof(SaveLoadGameDataController))]
     static class Patch_LoadPostfix
     {
-        private static string savePath;
+        public static string savePath;
 
-        [HarmonyPatch("LoadGameDataCoroutine")]
+        [HarmonyPatch("StartNewGame")]
         public static void Prefix(SaveLoadGameDataController __instance)
         {
-            //loadMods(__instance.savePath);
+            savePath = __instance.savePath;
         }
 
         [HarmonyPatch("LoadGameDataCoroutine", MethodType.Enumerator)]
@@ -42,7 +41,7 @@ namespace ACEOCustomBuildables.Patches
 
 
             // Path based stuff... Is there a file?
-            string path = savePath + "\\CustomSaveData.json";
+            string path = Path.Combine(savePath, "CustomSaveData.json");
             if (!File.Exists(path))
             {
                 SaveLoadUtility.quicklog("The CustomSaveData.json file does not exist. Skipped loading.", false);
@@ -93,7 +92,7 @@ namespace ACEOCustomBuildables.Patches
                 Vector3 customPostion = new Vector3(customItem.postion[0], customItem.postion[1], customItem.postion[2]);
                 float spriteRotation = customItem.spriteRotation;
                 float itemRotation = customItem.itemRotation;
-                
+
                 foreach (PlaceableItem worldItem in itemsList.ToList())
                 {
                     // Required to be the same
@@ -145,35 +144,6 @@ namespace ACEOCustomBuildables.Patches
 
             Singleton<SceneMessagePanelUI>.Instance.SetLoadingText(LocalizationManager.GetLocalizedValue("SaveLoadGameDataController.cs.key.almost-done"), 100);
             SaveLoadUtility.quicklog("Custom items finished loading, without any errors!", true);
-        }
-
-
-        public static void loadMods(string savePath)
-        {
-            Singleton<SceneMessagePanelUI>.Instance.SetLoadingText("Creating Custom Buildables...", 5);
-            if (TemplateManager.getAllTemplates())
-            {
-                ACEOCustomBuildables.Log("[Mod Nuetral] Started loading mod info!");
-                JSONManager.importJSON();
-                if (JSONManager.itemMods.Count != 0)
-                {
-                    ItemManager.clearBuildables();
-                    UIManager.clearUI();
-                    ACEOCustomBuildables.loadMods();
-                    ACEOCustomBuildables.buildableCreationProccessInProgress = true;
-                }
-            }
-            Patch_LoadPostfix.savePath = savePath;
-        }
-    }
-
-    [HarmonyPatch(typeof(SaveLoadGameDataController))]
-    static class NewGamePostix
-    {
-        [HarmonyPatch("StartNewGame")]
-        public static void Prefix(SaveLoadGameDataController __instance)
-        {
-            Patch_LoadPostfix.loadMods(__instance.savePath);
         }
     }
 }

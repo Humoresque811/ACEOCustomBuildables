@@ -5,15 +5,14 @@ using System.Collections.Generic;
 using System.IO;
 using UModFramework.API;
 using Newtonsoft.Json;
+using HarmonyLib;
 
 namespace ACEOCustomBuildables
 {
-    [UMFHarmony(11)] //Set this to the number of harmony patches in your mod.
+    [UMFHarmony(10)] //Set this to the number of harmony patches in your mod.
     [UMFScript]
     class ACEOCustomBuildables : MonoBehaviour
     {
-        public static bool buildableCreationProccessInProgress = false;
-
         internal static void Log(string text, bool clean = false)
         {
             using (UMFLog log = new UMFLog()) log.Log(text, clean);
@@ -43,41 +42,6 @@ namespace ACEOCustomBuildables
             {
                 ACEOCustomBuildables.Log("[Mod Error] Failed to get path. Error: " + ex.Message);
             }   
-        }
-
-
-        void Update()
-        {
-            if (buildableCreationProccessInProgress)
-            {
-                loadMods();
-            }
-        }
-
-        public static void loadMods()
-        {
-            if (!ItemManager.itemsCreated)
-            {
-                ItemManager.createBuildables();
-                if (!ItemManager.itemsFailed)
-                {
-                    ACEOCustomBuildables.Log("[Mod Success] Ended creating buildables. Created " + ItemManager.buildableModItems.Count + " buildable item(s)");
-                }
-            }
-
-            if (!UIManager.UICreated)
-            {
-                UIManager.createUI();
-                if (!UIManager.UIFailed)
-                {
-                    ACEOCustomBuildables.Log("[Mod Success] Ended creating UI. Created " + UIManager.newIcons.Count + " UI button(s)");
-                }
-            }
-
-            if (UIManager.UICreated && ItemManager.itemsCreated)
-            {
-                buildableCreationProccessInProgress = false;
-            }
         }
 	}
 }

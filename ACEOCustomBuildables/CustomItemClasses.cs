@@ -46,7 +46,7 @@ namespace ACEOCustomBuildables
     [System.Serializable]
     public class itemMod
     {
-        public bool enabled;
+        public bool enabled; 
         public string name;
         public string id;
         public string description;
@@ -57,13 +57,14 @@ namespace ACEOCustomBuildables
         public string iconPath;
         public int buildCost;
         public int operationCost;
-        public bool bogusOverride;
         public string itemPlacementArea;
         public bool useRandomRotation;
         public int constructionEnergy;
         public int contractors;
         public float shadowDistance;
         public float shadowTextureSizeMultiplier = 1.0f;
+        public bool bogusOverride;
+        public string buildMenu;
         public string pathToUse; //This is used and created by JSON Manager, not to be inputted
     }
 

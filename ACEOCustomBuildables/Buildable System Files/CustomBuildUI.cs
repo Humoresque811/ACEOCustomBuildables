@@ -50,8 +50,8 @@ namespace ACEOCustomBuildables
                 Singleton<AudioController>.Instance.PlayAudio(Enums.AudioClip.PointerEnter, true, 1f, 1f, false);
                 ObjectDescriptionPanelUI ObjectDescriptionPanel = Singleton<ObjectDescriptionPanelUI>.Instance;
                 ObjectDescriptionPanel.ShowTemplatePanel(assignedButton.transform, buildableName, buildableDescription);
-                ObjectDescriptionPanel.contractorCostText.text = "Construction Cost: " + buildableCost;
-                ObjectDescriptionPanel.operatingCostText.text = "Operating Cost: " + buildableOperatingCost;
+                ObjectDescriptionPanel.contractorCostText.text = $"{LocalizationManager.GetLocalizedValue("ObjectDescriptionPanelUI.cs.key.21")} {buildableCost}";
+                ObjectDescriptionPanel.operatingCostText.text = $"{LocalizationManager.GetLocalizedValue("ObjectDescriptionPanelUI.cs.key.27")} {buildableOperatingCost}";
                 ObjectDescriptionPanel.objectImageInstructionText.text = "No Preview Availible For Custom Buildables...";
 
                 assignedAnimator.Play("BounceButton");

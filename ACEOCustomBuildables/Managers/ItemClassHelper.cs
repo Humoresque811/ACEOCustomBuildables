@@ -3,15 +3,17 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using static OnlineMapsBingMapsElevation;
+using System.Security;
+using System.Linq;
 
 namespace ACEOCustomBuildables
 {
-    class InputCheckerHelper : MonoBehaviour
+    class ItemClassHelper : MonoBehaviour
     {
+        public static readonly string[] itemPlacementAreaOptions = new string[] { "Both", "Inside", "Outside" };
         private static string currentDialog = "";
         private static Action<string> currentLogger = null;
-        // This will be a future project. It is meant to allow simple checking of new vars, but the current idea was flawed. It will be for later
+
         public static void CheckItemMod(itemMod itemMod, Action<string> Logger)
         {
             if (Logger == null)
@@ -32,50 +34,73 @@ namespace ACEOCustomBuildables
 
             if (itemMod.bogusOverride)
             {
-                CheckIntItemModAtrribute(ref itemMod.x, 1, -1, "a x-value");
-                CheckIntItemModAtrribute(ref itemMod.y, 1, -1, "a y-value");
+                CheckIntModAttribute(ref itemMod.x, 1, -1, "a x-value");
+                CheckIntModAttribute(ref itemMod.y, 1, -1, "a y-value");
             }
             else
             {
-                CheckIntItemModAtrribute(ref itemMod.x, 1, 16, "a x-value");
-                CheckIntItemModAtrribute(ref itemMod.y, 1, 16, "a y-value");
+                CheckIntModAttribute(ref itemMod.x, 1, 16, "a x-value");
+                CheckIntModAttribute(ref itemMod.y, 1, 16, "a y-value");
             }
 
-            CheckIntItemModAtrribute(ref itemMod.buildCost, 1, -1, "a build cost"); // ten million max
-            CheckIntItemModAtrribute(ref itemMod.operationCost, 1, -1, "an operation cost"); // ten million max
-            CheckIntItemModAtrribute(ref itemMod.constructionEnergy, 1, 10000, "a construction energy value");
-            CheckIntItemModAtrribute(ref itemMod.contractors, 1, 100, "a contractors value");
-            CheckFloatItemModAtrribute(ref itemMod.shadowDistance, -10, 10, "a shadow distance value");
-            CheckFloatItemModAtrribute(ref itemMod.shadowTextureSizeMultiplier, 1, 5, "a shadow texture size multiplier");
+            CheckIntModAttribute(ref itemMod.buildCost, 1, -1, "a build cost");
+            CheckIntModAttribute(ref itemMod.operationCost, 1, -1, "an operation cost");
+            CheckIntModAttribute(ref itemMod.constructionEnergy, 1, 10000, "a construction energy value");
+            CheckIntModAttribute(ref itemMod.contractors, 1, 100, "a contractors value");
+            CheckFloatModAttribute(ref itemMod.shadowDistance, -10, 10, "a shadow distance value");
+            CheckFloatModAttribute(ref itemMod.shadowTextureSizeMultiplier, 1, 5, "a shadow texture size multiplier");
 
+            CheckStringModAttribute(ref itemMod.itemPlacementArea, itemPlacementAreaOptions, "a itemPlacementArea value");
+            CheckStringModAttribute(ref itemMod.buildMenu, TemplateManager.UIPanels.Keys.ToArray(), "a buildMenu value");
         }
 
         // Attribute Forwarders
+        private static void CheckStringModAttribute(ref string subject, in string[] options, in string variableName)
+        {
+            if (options == null)
+            {
+                return;
+            }
+            if (options.Length < 1)
+            {
+                return;
+            }
+            
+            if (options.Contains(subject))
+            {
+                // We're good, its a valid option
+                return;
+            }
 
-        private static void CheckIntItemModAtrribute(ref int subject, in int min, in int max, in string variableNameText)
+            string fullLog = $"{currentDialog} {variableName} that is not one of the possible options ({String.Join(", ", options)}), being \"{subject}\". " +
+                $"It has been changed to \"{options[0]}\"";
+            subject = options[0];
+            ShowDialog(currentLogger, fullLog);
+        }
+
+        private static void CheckIntModAttribute(ref int subject, in int min, in int max, in string variableName)
         {
             string output = IntCheck(ref subject, min, max);
             if (!string.IsNullOrEmpty(output))
             {
-                string fullLog = $"{currentDialog} {variableNameText} {output}";
+                string fullLog = $"{currentDialog} {variableName} that is {output}. Please check the mod log for more info!";
                 ShowDialog(currentLogger, fullLog);
                 return;
             }
         }
 
-        private static void CheckFloatItemModAtrribute(ref float subject, in float min, in float max, in string variableNameText)
+        private static void CheckFloatModAttribute(ref float subject, in float min, in float max, in string variableName)
         {
             string output = FloatCheck(ref subject, min, max);
             if (!string.IsNullOrEmpty(output))
             {
-                string fullLog = $"{currentDialog} {variableNameText} that is {output}. Please check the mod log for more info!";
+                string fullLog = $"{currentDialog} {variableName} that is {output}. Please check the mod log for more info!";
                 ShowDialog(currentLogger, fullLog);
                 return;
             }
         }
 
         // Actual Checkers
-
         private static string IntCheck(ref int subject, in int min, in int max)
         {
             float subjectFloat = subject;
@@ -111,9 +136,9 @@ namespace ACEOCustomBuildables
             return "";
         }
 
-        // Axuilary Code
 
-        private static string GetItemModIdentification(itemMod itemMod)
+        // Axuilary Code
+        public static string GetItemModIdentification(itemMod itemMod)
         {
             return GetModIdentification(itemMod.name, itemMod.id);
         }

@@ -13,8 +13,10 @@ namespace ACEOCustomBuildables
         public static List<floorMod> floorMods = new List<floorMod>();
         public static List<string> modPaths = new List<string>();
         public static string basePath = "";
+
         public static readonly string pathAddativeBase = "Buildables";
-        public static readonly string pathAddativeItems = "Items"; // This will require changing eventually, as there will be multiple
+        public static readonly string pathAddativeItems = "Items";
+        public static readonly string pathAddativeFloors = "Floors";
 
         public static void importJSON()
         {
@@ -167,115 +169,26 @@ namespace ACEOCustomBuildables
             }
         }
 
+        // This is used for the logger action in the input checker helper
+        private static void Log(string message)
+        {
+            ACEOCustomBuildables.Log(message);
+        }
 
         private static string bogusNumberScanner(int index)
         {
             // For shorter reference
             itemMod mod = itemMods[index];
-            string dialog;
 
             Action<string> Logger = new Action<string>(Log);
-            InputCheckerHelper.CheckItemMod(itemMods[index], Logger);
-
-            // These are the important ones in which case the mod needs to be removed
-            /*if (mod.x < 0 || mod.y < 0 || mod.operationCost < 0 || mod.buildCost < 0)
-            {
-                ACEOCustomBuildables.Log("[Buildable Problem] Your mod called \"" + mod.name + "\" seems to have a negative int value. This may break the game, so the mod has not been loaded.");
-                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a negative int value, so it wasn't loaded.";
-                itemMods.RemoveAt(index);
-                return dialog;
-            }
-
-            // Need the contruction variables to be valid
-            if (mod.constructionEnergy <= 0)
-            {
-                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a construction energy value below or at 0, so it was changed to 50.");
-                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a construction energy value below or at 0, so it was changed to 50.";
-                mod.constructionEnergy = 50;
-                return dialog;
-            }
-            if (mod.constructionEnergy > 5000)
-            {
-                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a too high construction energy value, so it was changed to 500.");
-                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a too high construction energy value, so it was changed to 500.";
-                mod.constructionEnergy = 500;
-                return dialog;
-            }
-
-            if (mod.contractors <= 0)
-            {
-                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a contracters value below or at 0, so it was changed to 1");
-                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a contracters value below or at 0, so it was changed to 1.";
-                mod.contractors = 1;
-                return dialog;
-            }
-            if (mod.contractors > 100)
-            {
-                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a too high contractors value, so it was changed to 100.");
-                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a too high contractors value, so it was changed to 100.";
-                mod.contractors = 100;
-                return dialog;
-            }
-
-            if (mod.shadowDistance < 0)
-            {
-                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a shadowDistance value below 0, so it was changed to 0");
-                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a shadowDistance value below 0, so it was changed to 0.";
-                mod.shadowDistance = 0;
-                return dialog;
-            }
-            if (mod.shadowTextureSizeMultiplier < 1)
-            {
-                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" seems to have a shadowMultiplier value below 1, so it was changed to 1.");
-                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has a shadowMultiplier value below 1, so it was changed to 1.";
-                mod.shadowTextureSizeMultiplier = 1;
-                return dialog;
-            }
-            */
-
-            // Non critical, both is assumed. Just for good measure
-            bool correctItemPlacementAreaInput = false;
-            if (mod.itemPlacementArea == "Both" || mod.itemPlacementArea == "Inside" || mod.itemPlacementArea == "Outside" )
-            {
-                correctItemPlacementAreaInput = true;
-            }
-            if (!correctItemPlacementAreaInput)
-            {
-                ACEOCustomBuildables.Log("[Buildable Non-Critical Problem] Your mod called \"" + mod.name + "\" does not have a valid item placment area (It's " + mod.itemPlacementArea + "). Both is assumed. The options for the value are:" +
-                    "\n Both \n Inside \n Outside");
-                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" doesn't have an item placement area variable, so \"Both\" was assumed.";
-                mod.itemPlacementArea = "Both";
-                return dialog;
-            }
-
-            // X and Y are not always enforced
-            /*if (mod.bogusOverride)
-            {
-                return "";
-            }
-
-
-            // I don't want people using big numbers, so I won't let them unless they know coding and can read this file or they ask me. Then I trust them.
-            if (mod.x > 16)
-            {
-                ACEOCustomBuildables.Log("[Buildable Problem] Your mod called \"" + mod.name + "\" seems to have a high \"x\" value. " +
-                    "This may break the game, so the mod has not been loaded. Contact Humoresque if you think your mod should work. Sorry!");
-                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has too high of a \"x\" value, so it wasn't loaded.";
-                itemMods.RemoveAt(index);
-                return dialog;
-            }
-            if (mod.y > 16)
-            {
-                ACEOCustomBuildables.Log("[Buildable Problem] Your mod called \"" + mod.name + "\" seems to have a high \"y\" value. " +
-                "This may break the game, so the mod has not been loaded. Contact Humoresque if you think your mod should work. Sorry!");
-                dialog = "[Airport CEO Custom Buildables] Your mod \"" + mod.name + "\" has too high of a \"y\" value, so it wasn't loaded.";
-                itemMods.RemoveAt(index);
-                return dialog;
-            }
-            */
+            ItemClassHelper.CheckItemMod(itemMods[index], Logger);
             return "";
         }
 
+        public static bool CanCountinueLoading()
+        {
+            return itemMods.Count > 0;
+        }
 
         /// <summary>
         /// Will get a sprite (png image) from a path using either mod index or mod class
@@ -327,6 +240,7 @@ namespace ACEOCustomBuildables
             else
             {
                 // Return the Fallback image
+                ACEOCustomBuildables.Log("[Mod Error] Invalid image type input into the image loader.");
                 return Singleton<DataPlaceholderItems>.Instance.smallPlantIcon;
             }
 
@@ -341,9 +255,5 @@ namespace ACEOCustomBuildables
             return Singleton<DataPlaceholderItems>.Instance.smallPlantIcon;
         }
 
-        private static void Log(string message)
-        {
-            ACEOCustomBuildables.Log(message);
-        }
 	}
 }

@@ -8,21 +8,45 @@ using System.Linq;
 
 namespace ACEOCustomBuildables
 {
-    class ItemClassHelper : MonoBehaviour
+    class BogusInputHelper : MonoBehaviour
     {
         public static readonly string[] itemPlacementAreaOptions = new string[] { "Both", "Inside", "Outside" };
         private static string currentDialog = "";
         private static Action<string> currentLogger = null;
 
-        public static void CheckItemMod(itemMod itemMod, Action<string> Logger)
+        public static void CheckFloorMod(FloorMod floorMod, Action<string> logger)
         {
-            if (Logger == null)
+            if (logger == null)
             {
-                ACEOCustomBuildables.Log("[Mod Error] Logger provided to input checker is null!");
+                ACEOCustomBuildables.Log("[Mod Error] Logger provided to floor input checker is null!");
                 return;
             }
 
-            currentLogger = Logger;
+            currentLogger = logger;
+
+            if (floorMod == null)
+            {
+                currentLogger("[Mod Error] Floor mod provided to input checker is null");
+                return;
+            }
+
+            currentDialog = $"[Buildable Non-Critical Issue] Your mod called {BuildableClassHelper.GetModIdentification(floorMod)} seems to have";
+
+            CheckIntModAttribute(ref floorMod.buildCost, 1, -1, "a build cost");
+            CheckIntModAttribute(ref floorMod.operationCost, 1, -1, "an operation cost");
+
+            CheckStringModAttribute(ref floorMod.buildMenu, TemplateManager.UIPanels.Keys.ToArray(), "a buildMenu value");
+        }
+
+        public static void CheckItemMod(ItemMod itemMod, Action<string> logger)
+        {
+            if (logger == null)
+            {
+                ACEOCustomBuildables.Log("[Mod Error] Logger provided to item input checker is null!");
+                return;
+            }
+
+            currentLogger = logger;
             
             if (itemMod == null)
             {
@@ -30,7 +54,7 @@ namespace ACEOCustomBuildables
                 return;
             }
 
-            currentDialog = $"[Buildable Non-Critical Issue] Your mod called {GetItemModIdentification(itemMod)} seems to have";
+            currentDialog = $"[Buildable Non-Critical Issue] Your mod called {BuildableClassHelper.GetModIdentification(itemMod)} seems to have";
 
             if (itemMod.bogusOverride)
             {
@@ -138,16 +162,6 @@ namespace ACEOCustomBuildables
 
 
         // Axuilary Code
-        public static string GetItemModIdentification(itemMod itemMod)
-        {
-            return GetModIdentification(itemMod.name, itemMod.id);
-        }
-
-        private static string GetModIdentification(string name, string id)
-        {
-            return $"\"{name}\", with id \"{id}\",";
-        }
-
         private static void ShowDialog(Action<string> Logger, string fullLog)
         {
             Logger(fullLog);

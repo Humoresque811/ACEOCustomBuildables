@@ -9,7 +9,23 @@ namespace ACEOCustomBuildables
     // Component
     public class CustomItemSerializableComponent : MonoBehaviour
     {
-        public int index;
+        public void Setup(int index, Type type)
+        {
+            if (Type.Equals(type, typeof(ItemMod)))
+            {
+                this.itemIndex = index;
+                this.floorIndex = nullInt;
+            }
+            if (Type.Equals(type, typeof(FloorMod)))
+            {
+                this.itemIndex = nullInt;
+                this.floorIndex = index;
+            }
+        }
+
+        public readonly int nullInt = -1;
+        public int itemIndex;
+        public int floorIndex;
     }
 
     // Save file
@@ -40,43 +56,5 @@ namespace ACEOCustomBuildables
         {
             this.customItemSerializables = new List<CustomItemSerializable>();
         }
-    }
-
-    // Item mod
-    [System.Serializable]
-    public class itemMod
-    {
-        public bool enabled; 
-        public string name;
-        public string id;
-        public string description;
-        public int x;
-        public int y;
-        public string texturePath;
-        public string shadowPath;
-        public string iconPath;
-        public int buildCost;
-        public int operationCost;
-        public string itemPlacementArea;
-        public bool useRandomRotation;
-        public int constructionEnergy;
-        public int contractors;
-        public float shadowDistance;
-        public float shadowTextureSizeMultiplier = 1.0f;
-        public bool bogusOverride;
-        public string buildMenu;
-        public string pathToUse; //This is used and created by JSON Manager, not to be inputted
-    }
-
-    // Floor mod
-    public class floorMod
-    {
-        public bool enabled;
-        public string name;
-        public string id;
-        public string description;
-        public string texturePath;
-        public string shadowPath;
-        public string iconPath;
     }
 }

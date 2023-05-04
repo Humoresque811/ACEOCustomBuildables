@@ -12,6 +12,7 @@ namespace ACEOCustomBuildables
         public Button assignedButton;
         public GameObject assignedObject;
         public Animator assignedAnimator;
+        public Type modType;
 
         public string buildableName;
         public string buildableDescription;
@@ -26,7 +27,7 @@ namespace ACEOCustomBuildables
                 assignedButton.onClick.RemoveAllListeners();
                 assignedButton.onClick.AddListener(delegate ()
                 {
-                    CustomBuildingController.spawnItem(assignedObject);
+                    CustomBuildingController.spawnItem(assignedObject, modType);
                     Singleton<AudioController>.Instance.PlayAudio(Enums.AudioClip.PointerClick, false, 1f, 1f, false);
                     Singleton<PlaceablePanelUI>.Instance.EnableDisableSearchFieldInput(false);
                     Singleton<ObjectDescriptionPanelUI>.Instance.HidePanel();

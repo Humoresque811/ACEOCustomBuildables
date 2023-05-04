@@ -31,27 +31,37 @@ namespace ACEOCustomBuildables
             }
 
             // Clear out last load's mods!
-            ItemManager.clearBuildables();
-            UIManager.clearUI();
-
-            JSONManager.importJSON(); // Before this workshop mods have allready been queued
-            if (!JSONManager.CanCountinueLoading())
+            foreach (Type type in FileManager.Instance.buildableTypes.Keys)
             {
-                ACEOCustomBuildables.Log("[Mod Nuetral] No mods loaded. Mod loading finished.");
-                return;
+                BuildableClassHelper.GetBuildableSourceCreator(type, out IBuildableSourceCreator buildableSourceCreator);
+                buildableSourceCreator.ClearBuildableMods(true); 
             }
 
-            ItemManager.createBuildables();
-            if (ItemManager.itemsFailed)
+            // Load the JSON files
+            foreach (Type type in FileManager.Instance.buildableTypes.Keys)
+            {
+                BuildableClassHelper.GetBuildableSourceCreator(type, out IBuildableSourceCreator buildableSourceCreator);
+                buildableSourceCreator.ImportMods();
+            }
+
+            // Create buildables
+            foreach (Type type in FileManager.Instance.buildableTypes.Keys)
+            {
+                BuildableClassHelper.GetBuildableCreator(type, out IBuildableCreator buildableCreator);
+                buildableCreator.ClearBuildables();
+                buildableCreator.CreateBuildables();
+            }
+
+            if (ItemCreator.Instance.itemsFailed)
             {
                 ACEOCustomBuildables.Log("[Mod Error] There was an error creating an item mod (see above). Mod loading will countinue.");
             }
             else
             {
-                ACEOCustomBuildables.Log("[Mod Success] Ended creating buildables. Created " + ItemManager.buildableModItems.Count + " buildable item(s)");
+                ACEOCustomBuildables.Log("[Mod Success] Ended creating buildables. Created " + ItemCreator.Instance.buildables.Count + " buildable item(s)");
             }
 
-            UIManager.createUI();
+            UIManager.CreateAllUI();
             if (UIManager.UIFailed)
             {
                 ACEOCustomBuildables.Log("[Mod Error] There was an error creating an UI button (see above). Mod loading will countinue.");

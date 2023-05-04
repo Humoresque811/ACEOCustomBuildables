@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Steamworks;
 
 namespace ACEOCustomBuildables
 {
@@ -12,6 +13,7 @@ namespace ACEOCustomBuildables
         public static Dictionary<string, GameObject> UIPanels { get; private set; }
         public static GameObject Panel_DecorationGroup;
         public static GameObject ItemTemplate;
+        public static GameObject FloorTemplate;
         public static ObjectPlacementController objectPlacementControllerTemplate; 
 
 
@@ -28,6 +30,10 @@ namespace ACEOCustomBuildables
                 successFlag = false;
             }
             if (!TryGetItemTemplate())
+            {
+                successFlag = false;
+            }
+            if (!TryGetFloorTemplate())
             {
                 successFlag = false;
             }
@@ -103,6 +109,21 @@ namespace ACEOCustomBuildables
             catch (Exception ex)
             {
                 ACEOCustomBuildables.Log("[Mod Error] Failed to get template item. Error: " + ex.Message);
+                return false;
+            }
+        }
+
+        private static bool TryGetFloorTemplate()
+        {
+            try
+            {
+                FloorTemplate = Singleton<BuildingController>.Instance.terminalPrefabs.hardFloor;
+                ACEOCustomBuildables.Log("[Mod Success] Got template floor");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ACEOCustomBuildables.Log("[Mod Error] Failed to get template floor. Error: " + ex.Message);
                 return false;
             }
         }

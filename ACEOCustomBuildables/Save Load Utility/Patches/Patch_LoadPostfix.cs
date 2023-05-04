@@ -112,12 +112,18 @@ namespace ACEOCustomBuildables
                         SaveLoadUtility.quicklog("What? The reference ID is different, but the postion and floor are the same? huh?", true);
                     }
 
-                    // We know now that they are the same! We need to find the index of the mod from the id now
-                    for (int i = 0; i < JSONManager.itemMods.Count; i++)
+                    // We know now that they are the same! We need to find the itemIndex of the mod from the id now
+                    for (int i = 0; i < ItemModSourceCreator.Instance.buildableMods.Count; i++)
                     {
-                        if (!string.Equals(JSONManager.itemMods[i].id, customItem.modId))
+                        ItemMod itemMod = ItemModSourceCreator.Instance.buildableMods[i] as ItemMod;
+                        if (itemMod == null)
                         {
-                            if (i != JSONManager.itemMods.Count - 1)
+                            continue;
+                        }
+
+                        if (!string.Equals(itemMod.id, customItem.modId))
+                        {
+                            if (i != ItemModSourceCreator.Instance.buildableMods.Count - 1)
                             {
                                 continue;
                             }
@@ -130,13 +136,13 @@ namespace ACEOCustomBuildables
                         }
 
                         // The id is the same!
-                        if (JSONManager.itemMods[i].useRandomRotation)
+                        if (itemMod.useRandomRotation)
                         {
-                            ItemManager.convertItemToCustom(worldItem.gameObject, i, true, spriteRotation, itemRotation);
+                            ItemCreator.Instance.ConvertItemToCustom(worldItem.gameObject, i, true, spriteRotation, itemRotation);
                             break;
                         }
 
-                        ItemManager.convertItemToCustom(worldItem.gameObject, i, false, spriteRotation, itemRotation);
+                        ItemCreator.Instance.ConvertItemToCustom(worldItem.gameObject, i, false, spriteRotation, itemRotation);
                         break;
                     }
                 }

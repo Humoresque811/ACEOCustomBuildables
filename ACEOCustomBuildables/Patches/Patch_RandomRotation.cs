@@ -25,7 +25,18 @@ namespace ACEOCustomBuildables
             {
                 try
                 {
-                    if (JSONManager.itemMods[mod.index].useRandomRotation)
+                    if (mod.itemIndex == mod.nullInt)
+                    {
+                        return true;
+                    }
+
+                    ItemMod itemMod = FileManager.Instance.buildableTypes[typeof(ItemMod)].Item2.buildableMods[mod.itemIndex] as ItemMod;
+                    if (itemMod == null)
+                    {
+                        return true;
+                    }
+
+                    if (itemMod.useRandomRotation)
                     {
                         return true;
                     }

@@ -111,13 +111,13 @@ namespace ACEOCustomBuildables
             }
         }
 
-        public static CustomItemSerializable setSerializableInfo(int index, PlaceableItem item)
+        public static CustomItemSerializable SetSerializableInfo(int index, PlaceableItem item)
         {
             try
             {
                 // Transfer vars and nessesary info
                 CustomItemSerializable returnItem = new CustomItemSerializable();
-                returnItem.modId = JSONManager.itemMods[index].id;
+                returnItem.modId = ItemModSourceCreator.Instance.buildableMods[index].id;
                 returnItem.spriteRotation = Mathf.Round(item.transform.GetChild(0).GetChild(0).transform.eulerAngles.z);
                 returnItem.itemRotation = Mathf.Round(item.transform.eulerAngles.z);
 

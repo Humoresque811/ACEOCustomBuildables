@@ -9,63 +9,91 @@ namespace ACEOCustomBuildables
     class UIManager : MonoBehaviour
     {
         public static List<GameObject> newIcons = new List<GameObject>();
-        public static bool UICreated = false;
         public static bool UIFailed = false;
 
-        public static void clearUI()
+        public static void ClearUI()
         {
             for (int i = 0; i < newIcons.Count; i++)
             {
                 Destroy(newIcons[i]);
             }
             newIcons = new List<GameObject>();
-            UICreated = false;
         }
 
-        public static void createUI()
+        public static void CreateAllUI()
         {
-            for (int i = 0; i < JSONManager.itemMods.Count; i++)
+            foreach (Type type in FileManager.Instance.buildableTypes.Keys)
             {
-                try
+                List<TexturedBuildableMod> buildableMods = FileManager.Instance.buildableTypes[type].Item2.buildableMods;
+                List<GameObject> buildables = FileManager.Instance.buildableTypes[type].Item3.buildables;
+
+                if (buildableMods.Count != buildables.Count)
                 {
-                    // Get template
-                    GameObject panel = TemplateManager.UIPanels[JSONManager.itemMods[i].buildMenu];
+                    ACEOCustomBuildables.Log($"[Mod Error] There are not the same amount of buildable mods as buildables in type {type.Name}.");
+                    continue;
+                }
+
+                for (int i = 0; i < buildableMods.Count; i++)
+                {
+
+                    /*if (buildables[i].TryGetComponent<PlaceableFloor>(out PlaceableFloor placeableFloor))
+                    {
+                        ACEOCustomBuildables.Log("has + " + placeableFloor.variationIndex.ToString());
+                        continue;
+                    }
+                    else
+                    {
+                        ACEOCustomBuildables.Log("doesnt");
+                    }*/
+
+                    CreateUI(buildableMods[i], buildables[i], type);
+                }
+            }
+        }
+
+        private static void CreateUI(TexturedBuildableMod buildableMod, GameObject buildable, Type type)
+        {
+            try
+            {
+                // Get template
+                GameObject panel = TemplateManager.UIPanels[buildableMod.buildMenu];
                     
-                    // UI Creation
-                    GameObject button = TemplateManager.UIPanels["DecorationViewport"].transform.GetChild(0).gameObject;
-                    GameObject newButton = Instantiate(button, Vector3.zero, button.transform.rotation);
-                    newButton.name = $"CustomItem {i}";
-                    newButton.transform.SetParent(panel.transform);
-                    newButton.transform.GetChild(0).GetComponent<Image>().sprite = JSONManager.getSpriteFromPath(i, "Icon");
-                    Destroy(newButton.GetComponent<BuildButtonAssigner>());
-                    Destroy(newButton.GetComponent<BuildButtonTextManager>());
+                // UI Creation
+                GameObject button = TemplateManager.UIPanels["DecorationViewport"].transform.GetChild(0).gameObject;
+                GameObject newButton = Instantiate(button, Vector3.zero, button.transform.rotation);
+                newButton.name = $"CustomItem";
+                newButton.transform.SetParent(panel.transform);
 
-                    newButton.gameObject.AddComponent(typeof(CustomBuildUI));
-                    CustomBuildUI buildUI = newButton.GetComponent<CustomBuildUI>();
+                FileManager.Instance.GetIconSprite(buildableMod, out Sprite sprite);
+                newButton.transform.GetChild(0).GetComponent<Image>().sprite = sprite;
 
-                    buildUI.buildableName = JSONManager.itemMods[i].name;
-                    buildUI.buildableDescription = JSONManager.itemMods[i].description;
-                    buildUI.buildableCost = JSONManager.itemMods[i].buildCost;
-                    buildUI.buildableOperatingCost = JSONManager.itemMods[i].operationCost;
+                Destroy(newButton.GetComponent<BuildButtonAssigner>());
+                Destroy(newButton.GetComponent<BuildButtonTextManager>());
 
-                    buildUI.assignedButton = newButton.GetComponent<Button>();
-                    buildUI.assignedObject = ItemManager.buildableModItems[i].gameObject;
-                    //buildUI.assignedObject = Singleton<BuildingController>.Instance.terminalPrefabs.hardFloor; // TESTING CODE ----------------------------------------------------------------------------
-                    buildUI.assignedAnimator = newButton.GetComponent<Animator>();
+                newButton.gameObject.AddComponent(typeof(CustomBuildUI));
+                CustomBuildUI buildUI = newButton.GetComponent<CustomBuildUI>();
 
-                    buildUI.convertButtonToCustom();
+                buildUI.buildableName = buildableMod.name;
+                buildUI.buildableDescription = buildableMod.description;
+                buildUI.buildableCost = buildableMod.buildCost;
+                buildUI.buildableOperatingCost = buildableMod.operationCost;
 
-                    newIcons.Add(newButton);
-                    ACEOCustomBuildables.Log("[Mod Success] Created UI button \"" + JSONManager.itemMods[i].name + "\" successfully");
-                }
-                catch (Exception ex)
-                {
-                    ACEOCustomBuildables.Log("[Mod Error] Creating UI button \"" + JSONManager.itemMods[i].name + "\" failed. Error: " + ex.Message);
-                }
+                buildUI.assignedButton = newButton.GetComponent<Button>();
+                buildUI.assignedObject = buildable;
+                buildUI.modType = type;
+                buildUI.assignedAnimator = newButton.GetComponent<Animator>();
+
+                buildUI.convertButtonToCustom();
+
+                newIcons.Add(newButton);
+                ACEOCustomBuildables.Log("[Mod Success] Created UI button \"" + buildableMod.name + "\" successfully");
+            }
+            catch (Exception ex)
+            {
+                ACEOCustomBuildables.Log("[Mod Error] Creating UI button \"" + buildableMod.name + "\" failed. Error: " + ex.Message);
             }
 
             UIFailed = false;
-            UICreated = true;
         }
 	}
 }

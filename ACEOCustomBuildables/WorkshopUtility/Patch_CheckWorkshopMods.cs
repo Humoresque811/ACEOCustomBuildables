@@ -18,16 +18,17 @@ namespace ACEOCustomBuildables
             for (int i = 0; i < directories.Length; i++)
             {
                 // Is there a subfolder with Buildables?
-                if (!directories[i].SafeSubstring(directories[i].Length - 10, 10).Equals("Buildables"))
+                if (!directories[i].SafeSubstring(directories[i].Length - 10, 10).Equals(FileManager.Instance.pathAddativeBase))
                 {
                     continue;
                 }
                 ACEOCustomBuildables.Log("[Mod Nuetral] Started loading a mod from the workshop!");
 
-                string fullPath = Path.Combine(path, JSONManager.pathAddativeBase, JSONManager.pathAddativeItems); // Code accodomates future changes to the folder
-                if (Workshoputility.checkIfFolderValid(fullPath))
+                string basePath = Path.Combine(path, FileManager.Instance.pathAddativeBase);
+                if (Workshoputility.CheckIfFolderValid(basePath, out Type modType, out string extendedPath))
                 {
-                    JSONManager.modPaths.Add(fullPath);
+                    BuildableClassHelper.GetBuildableSourceCreator(modType, out IBuildableSourceCreator buildableSourceCreator);
+                    buildableSourceCreator.modPaths.Add(extendedPath);
                     continue;
                 }
             }

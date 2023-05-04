@@ -8,28 +8,29 @@ namespace ACEOCustomBuildables
 {
     class JSONManager : MonoBehaviour
     {
+
+        // THIS CODE IS NO LONGER IN USE! DO NOT REFERENCE! Will be removed before release of 1.1
+
         //Setup Variables
-        public static List<itemMod> itemMods = new List<itemMod>();
-        public static List<floorMod> floorMods = new List<floorMod>();
-        public static List<string> modPaths = new List<string>();
-        public static string basePath = "";
+        private static List<ItemMod> itemMods = new List<ItemMod>();
+        private static List<FloorMod> floorMods = new List<FloorMod>();
+        private static List<string> modPaths = new List<string>();
 
-        public static readonly string pathAddativeBase = "Buildables";
-        public static readonly string pathAddativeItems = "Items";
-        public static readonly string pathAddativeFloors = "Floors";
-
-        public static void importJSON()
+        private static void importJSON()
         {
+            throw new NotImplementedException();
+
             // Clears mods
-            itemMods = new List<itemMod>();
-            floorMods = new List<floorMod>();
-            ItemManager.buildableModItems = new List<GameObject>();
+#pragma warning disable CS0162 // Unreachable code detected
+            itemMods = new List<ItemMod>();
+            floorMods = new List<FloorMod>();
+            ItemCreator.Instance.buildables = new List<GameObject>();
 
             importJSONFromFolder();
 
             if (modPaths.Count <= 0)
             {
-                ACEOCustomBuildables.Log("[Mod Success] (re-)Imported " + JSONManager.itemMods.Count + " JSON file(s) from just the buildables folder");
+                ACEOCustomBuildables.Log("[Mod Success] (re-)Imported " + itemMods.Count + " JSON file(s) from just the buildables folder");
                 return;
             }
 
@@ -37,16 +38,18 @@ namespace ACEOCustomBuildables
             {
                 importJSONFromFolder(modPaths[i]);
             }
-            ACEOCustomBuildables.Log("[Mod Success] (re-)Imported " + JSONManager.itemMods.Count + " JSON file(s) from mods and the buildables folder");
+            ACEOCustomBuildables.Log("[Mod Success] (re-)Imported " + itemMods.Count + " JSON file(s) from mods and the buildables folder");
         }
 
         private static void importJSONFromFolder(string path = "")
         {
+            throw new NotImplementedException();
+
             string internalLog = "";
             bool giveUsePath = false;
             if (string.IsNullOrEmpty(path))
             {
-                path = basePath;
+                path = FileManager.Instance.basePath;
                 ACEOCustomBuildables.Log("[Mod Nuetral] Started reading the LocalLow buildables folder");
             }
             else
@@ -86,22 +89,22 @@ namespace ACEOCustomBuildables
                 // Adds mods
                 for (int i = 0; i < jsonFilePaths.Length; i++)
                 {
-                    if (getJSONFileContent(jsonFilePaths[i]) == null)
+                    if (FileManager.Instance.GetJSONFileContent(jsonFilePaths[i]) == null)
                     {
                         ACEOCustomBuildables.Log("[Mod Error] JSON File Paths is null!");
                         return;
                     }
 
                     // Make sure the mod being added is enabled
-                    itemMod preLoadedMod = JsonUtility.FromJson<itemMod>(getJSONFileContent(jsonFilePaths[i]));
+                    ItemMod preLoadedMod = JsonUtility.FromJson<ItemMod>(FileManager.Instance.GetJSONFileContent(jsonFilePaths[i]));
                     if (preLoadedMod.enabled != true)
                     {
                         continue;
                     }
 
                     // This is an old system that does not work as intended, but doesn't hurt anything, so it is staying for now
-                    itemMods.Add(new itemMod());
-                    itemMods[itemMods.Count - 1] = JsonUtility.FromJson<itemMod>(getJSONFileContent(jsonFilePaths[i]));
+                    itemMods.Add(new ItemMod());
+                    itemMods[itemMods.Count - 1] = JsonUtility.FromJson<ItemMod>(FileManager.Instance.GetJSONFileContent(jsonFilePaths[i]));
 
                     if (giveUsePath)
                     {
@@ -154,106 +157,28 @@ namespace ACEOCustomBuildables
             }
         }
 
-        private static string getJSONFileContent(string path)
-        {
-            if (!File.Exists(path))
-            {
-                ACEOCustomBuildables.Log("[Mod Error] Nothing at getJSONFileContent's provided search path!");
-                return null;
-            }
-
-            // We know the file exists now!
-            using (StreamReader reader = new StreamReader(path))
-            {
-                return reader.ReadToEnd();
-            }
-        }
-
         // This is used for the logger action in the input checker helper
         private static void Log(string message)
         {
+            throw new NotImplementedException();
             ACEOCustomBuildables.Log(message);
         }
 
         private static string bogusNumberScanner(int index)
         {
+            throw new NotImplementedException();
             // For shorter reference
-            itemMod mod = itemMods[index];
+            ItemMod mod = itemMods[index];
 
             Action<string> Logger = new Action<string>(Log);
-            ItemClassHelper.CheckItemMod(itemMods[index], Logger);
+            BogusInputHelper.CheckItemMod(itemMods[index], Logger);
             return "";
         }
 
-        public static bool CanCountinueLoading()
+        private static bool CanCountinueLoading()
         {
+            throw new NotImplementedException();
             return itemMods.Count > 0;
         }
-
-        /// <summary>
-        /// Will get a sprite (png image) from a path using either mod index or mod class
-        /// </summary>
-        /// <param name="modIndex">The JSONManager mod index to get mod info from</param>
-        /// <param name="spriteType">What type of sprite to get ("Texture", "Shadow", or "Icon")</param>
-        /// <param name="modClass">A mod class to use instead of mod index</param>
-        /// <returns>The loaded Sprite, or a placeholder sprite if an error was encountered</returns>
-        public static Sprite getSpriteFromPath(int modIndex, string spriteType, itemMod modClass = null)
-        {
-            // Local Vars
-            itemMod modClassToUse;
-            string path;
-
-            // Determine which class to use
-            modClassToUse = modClass ?? JSONManager.itemMods[modIndex];
-            
-            // Determine if workshop or not and then use correct path
-            if (string.IsNullOrEmpty(modClassToUse.pathToUse))
-            {
-                path = basePath + Path.DirectorySeparatorChar;
-                
-            }
-            else
-            {
-                path = modClassToUse.pathToUse + Path.DirectorySeparatorChar;
-            }
-
-            // Determine which texture to use
-            if (spriteType == "Texture")
-            {
-                path += modClassToUse.texturePath;
-            }
-            else if (spriteType == "Shadow")
-            {
-                if (string.Equals(modClassToUse.shadowPath, "autogenerate"))
-                {
-                    path += modClassToUse.texturePath;
-                }
-                else
-                {
-                    path += modClassToUse.shadowPath;
-                }
-            }
-            else if (spriteType == "Icon")
-            {
-                path += modClassToUse.iconPath;
-            }
-            else
-            {
-                // Return the Fallback image
-                ACEOCustomBuildables.Log("[Mod Error] Invalid image type input into the image loader.");
-                return Singleton<DataPlaceholderItems>.Instance.smallPlantIcon;
-            }
-
-            // If texture keyword correct, then check if it exists
-            if (File.Exists(path))
-            {
-                // This should be whats returned
-                return Utils.LoadImage(path);
-            }
-
-            // If it doesn't exist, return this
-            return Singleton<DataPlaceholderItems>.Instance.smallPlantIcon;
-        }
-
 	}
 }

@@ -3,12 +3,13 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Drawing;
 
 namespace ACEOCustomBuildables
 {
     class CustomBuildingController : MonoBehaviour
     {
-        public static void spawnItem(GameObject item)
+        public static void spawnItem(GameObject item, Type type)
         {
             // Get template
             ObjectPlacementController placementController = TemplateManager.objectPlacementControllerTemplate;
@@ -21,7 +22,24 @@ namespace ACEOCustomBuildables
                     {
                         item.SetActive(true);
                     }
-                    
+
+                    if (Type.Equals(type, typeof(FloorMod)))
+                    {
+                        if (!item.TryGetComponent<PlaceableFloor>(out PlaceableFloor placeableFloor))
+                        {
+                            ACEOCustomBuildables.Log("[Mod Error] Failed to get placeableFloor component on item...?");
+                            return;
+                        }
+
+                        //item.transform.GetChild(0).localScale = ItemCreator.Instance.calculateScale(item.transform.GetChild(0).gameObject, 1f, 1f);                        
+
+                        //VariationsHandler.CurrentVariationSizeType = placeableFloor.objectSize;
+                        //VariationsHandler.CurrentVariationQualityType = placeableFloor.objectQuality;
+                        VariationsHandler.currentVariationIndex = placeableFloor.variationIndex;
+                        placementController.SetObject(item, 0);
+                        return;
+                    }
+
                     placementController.SetObject(item, 0);
                 }
                 catch (Exception ex)

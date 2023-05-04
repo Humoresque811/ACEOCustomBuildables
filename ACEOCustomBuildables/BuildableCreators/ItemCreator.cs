@@ -8,32 +8,38 @@ using HarmonyLib;
 
 namespace ACEOCustomBuildables
 {
-    class ItemManager : MonoBehaviour
+    class ItemCreator : MonoBehaviour, IBuildableCreator
     {
-        public static GameObject newBuildable;
-        public static List<GameObject> buildableModItems = new List<GameObject>();
-        public static bool itemsCreated = false;
-        public static bool itemsFailed = false;
+        public static ItemCreator Instance { get; private set; }
 
-        public static void clearBuildables()
+        public List<GameObject> buildables { get; set; }
+        private GameObject newBuildable;
+        public bool itemsFailed = false;
+
+        public void SetUp()
         {
-            for (int i = 0; i < buildableModItems.Count; i++)
-            {
-                buildableModItems.RemoveAt(i);
-            }
-
-            itemsCreated = false;
+            Instance = this;
+            buildables = new List<GameObject>();
         }
 
-        public static void createBuildables()
+        public void ClearBuildables()
         {
-            if (itemsCreated)
-            {
-                return;
-            }
+            buildables = new List<GameObject>();
+        }
 
-            for (int i = 0; i < JSONManager.itemMods.Count; i++)
+        public void CreateBuildables()
+        {
+            buildables = new List<GameObject>();
+
+            for (int i = 0; i < FileManager.Instance.buildableTypes[typeof(ItemMod)].Item2.buildableMods.Count; i++)
             {
+                ItemMod itemMod = FileManager.Instance.buildableTypes[typeof(ItemMod)].Item2.buildableMods[i] as ItemMod;
+                if (itemMod == null)
+                {
+                    ACEOCustomBuildables.Log("[Mod Error] A buildable mod of ItemSourceCreators is not an item mod!");
+                    continue;
+                }
+
                 try
                 {
                     // Get template item
@@ -42,43 +48,51 @@ namespace ACEOCustomBuildables
                     // Start proccess
                     newBuildable = Instantiate(template, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
 
-                    newBuildable = convertPlaceableItemIntoCustom(newBuildable, i, 0);
+                    newBuildable = ConvertPlaceableItemIntoCustom(newBuildable, itemMod, i, 0);
+
 
                     // Do scaling
                     Transform spritesParent = newBuildable.transform.GetChild(0);
-                    int x = JSONManager.itemMods[i].x;
-                    int y = JSONManager.itemMods[i].y;
-                    float multiplyer = JSONManager.itemMods[i].shadowTextureSizeMultiplier;
+                    int x = itemMod.x;
+                    int y = itemMod.y;
+                    float multiplyer = itemMod.shadowTextureSizeMultiplier;
                     spritesParent.GetChild(0).localScale = calculateScale(spritesParent.GetChild(0).gameObject, x, y); // texture
                     spritesParent.GetChild(1).localScale = calculateScale(spritesParent.GetChild(1).gameObject, x * multiplyer, y * multiplyer); // shadow
 
                     if (newBuildable == null)
                     {
-                        ACEOCustomBuildables.Log("[Mod Error] New Buildable \"" + JSONManager.itemMods[i].name + "\"is null!");
+                        ACEOCustomBuildables.Log("[Mod Error] New Buildable \"" + itemMod.name + "\" is null!");
+                        continue;
                     }
 
-                    buildableModItems.Add(newBuildable);
+                    buildables.Add(newBuildable);
                     newBuildable.SetActive(false);
 
-                    ACEOCustomBuildables.Log("[Mod Success] Created buildable item \"" + JSONManager.itemMods[i].name + "\" successfully");
+                    ACEOCustomBuildables.Log("[Mod Success] Created buildable item \"" + itemMod.name + "\" successfully");
 
                     newBuildable = null;
                 }
                 catch (Exception ex)
                 {
-                    ACEOCustomBuildables.Log("[Mod Error] Creating buildable \"" + JSONManager.itemMods[i].name + "\" failed. Error: " + ex.Message);
+                    ACEOCustomBuildables.Log("[Mod Error] Creating buildable \"" + itemMod.name + "\" failed. Error: " + ex.Message);
                     itemsFailed = true;
                 }
             }
 
             // Post creation variable edits
-            itemsCreated = true;
             itemsFailed = false;
         }
 
-        public static void convertItemToCustom(GameObject item, int index, bool useRandomRotation, float spriteRotation, float itemRotation)
+        public void ConvertItemToCustom(GameObject item, int index, bool useRandomRotation, float spriteRotation, float itemRotation)
         {
             string internalLog = ""; // This is for logging, to show how far the code has got. Will only be logged upon a code failure
+            ItemMod itemMod = FileManager.Instance.buildableTypes[typeof(ItemMod)].Item2.buildableMods[index] as ItemMod;
+            if (itemMod == null)
+            {
+                ACEOCustomBuildables.Log("[Mod Error] A buildable mod of itemSOurceCreators is not an item mod!");
+                return;
+            }
+
             try
             {
                 if (item == null || index <= -1)
@@ -91,7 +105,7 @@ namespace ACEOCustomBuildables
                 SingletonNonDestroy<GridController>.Instance.RemoveReferenceFromMainGrid(pli.GetAllBorderPositions(), pli.ReferenceBytes);
                 internalLog += "\nFinished pre-converstion edits";
 
-                convertPlaceableItemIntoCustom(item, index, itemRotation);
+                ConvertPlaceableItemIntoCustom(item, itemMod, index, itemRotation);
                 internalLog += "\nFinsihed conversion";
 
                 // Materials
@@ -110,9 +124,9 @@ namespace ACEOCustomBuildables
 
                 // For scaling the textures
                 Transform spritesParent = item.transform.GetChild(0);
-                int x = JSONManager.itemMods[index].x;
-                int y = JSONManager.itemMods[index].y;
-                float multiplyer = JSONManager.itemMods[index].shadowTextureSizeMultiplier;
+                int x = itemMod.x;
+                int y = itemMod.y;
+                float multiplyer = itemMod.shadowTextureSizeMultiplier;
                 spritesParent.GetChild(0).localScale = calculateScale(spritesParent.GetChild(0).gameObject, x, y); // texture
                 spritesParent.GetChild(1).localScale = calculateScale(spritesParent.GetChild(1).gameObject, x * multiplyer, y * multiplyer); // shadow
                 internalLog += "\nFinished texture scaling";
@@ -141,6 +155,7 @@ namespace ACEOCustomBuildables
                 pli.overlay.UpdateOverlaySpriteMaterial(pli.isInside);
                 if (pli.isInside)
                 {
+                    pli.transform.GetChild(0).GetChild(1).GetComponent<SpriteRenderer>().sortingLayerName = "BelowObjects";
                     Traverse.Create(pli.overlay).Field<SpriteRenderer>("mainOverlaySprite").Value.sortingLayerName = "SpriteOverlay";
                     Traverse.Create(pli.overlay).Field<SpriteRenderer>("constructionOverlaySprite").Value.sortingLayerName = "SpriteOverlay";
                 }
@@ -155,21 +170,21 @@ namespace ACEOCustomBuildables
             {
                 ACEOCustomBuildables.Log("[Mod Error] An error occured while converting an item to custom. Info:" +
                     "\nError: " + ex.Message + 
-                    "\nCustomItemName: " + JSONManager.itemMods[index].name + ", postion: " + item.transform.position.ToString() + 
+                    "\nCustomItemName: " + itemMod.name + ", postion: " + item.transform.position.ToString() + 
                     "\nError Debug Log: " + internalLog);
             }
         }
 
-        private static GameObject convertPlaceableItemIntoCustom(GameObject item, int index, float itemRotation)
+        private GameObject ConvertPlaceableItemIntoCustom(GameObject item, ItemMod itemMod, int index, float itemRotation)
         {
-            if (item == null || index <= -1)
+            if (item == null || itemMod == null)
             {
                 return null;
             }
 
             // For storing info/indentifying Mods
             CustomItemSerializableComponent itemsCustomSerializableInfo = item.gameObject.AddComponent<CustomItemSerializableComponent>();
-            itemsCustomSerializableInfo.index = index;
+            itemsCustomSerializableInfo.Setup(index, typeof(ItemMod));
 
             // Core Sprite Changes p1
             GameObject sprite = item.transform.GetChild(0).gameObject;
@@ -180,29 +195,33 @@ namespace ACEOCustomBuildables
             // Core Sprite Changes p2
             GameObject texture = sprite.transform.GetChild(0).gameObject;
             GameObject shadow = sprite.transform.GetChild(1).gameObject;
-            texture.GetComponent<SpriteRenderer>().sprite = JSONManager.getSpriteFromPath(index, "Texture");
-            shadow.GetComponent<SpriteRenderer>().sprite = JSONManager.getSpriteFromPath(index, "Shadow");
+
+            FileManager.Instance.GetTextureSprite(itemMod, out Sprite textureSprite);
+            texture.GetComponent<SpriteRenderer>().sprite = textureSprite;
+
+            FileManager.Instance.GetShadowSprite(itemMod, out Sprite shadowSprite);
+            shadow.GetComponent<SpriteRenderer>().sprite = shadowSprite;
 
             // Edit odd overlay thing (IDK what it does...?)
-            overlay.transform.GetChild(0).localScale = new Vector3(JSONManager.itemMods[index].x, JSONManager.itemMods[index].y, 1);
+            overlay.transform.GetChild(0).localScale = new Vector3(itemMod.x, itemMod.y, 1);
 
             // Changes the wireframe overlay appropriatly, making sure that it is in tiled mode
             SpriteRenderer wireframeSpriteRenderer = overlay.transform.GetChild(1).GetChild(0).GetChild(0).GetComponent<SpriteRenderer>();
             wireframeSpriteRenderer.drawMode = SpriteDrawMode.Tiled;
-            wireframeSpriteRenderer.size = new Vector2(JSONManager.itemMods[index].x, JSONManager.itemMods[index].y);
+            wireframeSpriteRenderer.size = new Vector2(itemMod.x, itemMod.y);
 
             GameObject boundary = item.transform.GetChild(2).gameObject;
             Vector3 negCorner;
             Vector3 posCorner;
             if (itemRotation == 0 || itemRotation == 180)
             {
-                negCorner = new Vector3((float)-Decimal.Divide(JSONManager.itemMods[index].x, 2), (float)-Decimal.Divide(JSONManager.itemMods[index].y, 2), 0); // Needs 90 degreee adjustment!!
-                posCorner = new Vector3((float)Decimal.Divide(JSONManager.itemMods[index].x, 2), (float)Decimal.Divide(JSONManager.itemMods[index].y, 2), 0);
+                negCorner = new Vector3((float)-Decimal.Divide(itemMod.x, 2), (float)-Decimal.Divide(itemMod.y, 2), 0); // Needs 90 degreee adjustment!!
+                posCorner = new Vector3((float)Decimal.Divide(itemMod.x, 2), (float)Decimal.Divide(itemMod.y, 2), 0);
             }
             else
             {
-                negCorner = new Vector3((float)-Decimal.Divide(JSONManager.itemMods[index].y, 2), (float)-Decimal.Divide(JSONManager.itemMods[index].x, 2), 0); // Needs 90 degreee adjustment!!
-                posCorner = new Vector3((float)Decimal.Divide(JSONManager.itemMods[index].y, 2), (float)Decimal.Divide(JSONManager.itemMods[index].x, 2), 0);
+                negCorner = new Vector3((float)-Decimal.Divide(itemMod.y, 2), (float)-Decimal.Divide(itemMod.x, 2), 0); // Needs 90 degreee adjustment!!
+                posCorner = new Vector3((float)Decimal.Divide(itemMod.y, 2), (float)Decimal.Divide(itemMod.x, 2), 0);
             }
 
             boundary.transform.GetChild(0).GetChild(0).transform.position = negCorner;
@@ -214,27 +233,28 @@ namespace ACEOCustomBuildables
             // Script related chagnes
             PlaceableItem newBuildablePI = item.GetComponent<PlaceableItem>();
             newBuildablePI.hasVariations = false;
-            newBuildablePI.objectName = JSONManager.itemMods[index].name;
-            newBuildablePI.objectDescription = JSONManager.itemMods[index].description;
-            newBuildablePI.objectCost = JSONManager.itemMods[index].buildCost;
-            newBuildablePI.operationsCost = JSONManager.itemMods[index].operationCost;
-            newBuildablePI.snapOffset = calculatOffest(index);
-            newBuildablePI.constructionEnergyRequired = JSONManager.itemMods[index].constructionEnergy;
-            newBuildablePI.nbrOfContractorsPossible = JSONManager.itemMods[index].contractors;
+            newBuildablePI.objectName = itemMod.name;
+            newBuildablePI.objectDescription = itemMod.description;
+            newBuildablePI.objectCost = itemMod.buildCost;
+            newBuildablePI.operationsCost = itemMod.operationCost;
+            newBuildablePI.snapOffset = calculatOffest(itemMod);
+            newBuildablePI.constructionEnergyRequired = itemMod.constructionEnergy;
+            newBuildablePI.nbrOfContractorsPossible = itemMod.contractors;
             newBuildablePI.colorableSprites = new SpriteRenderer[0]; // Disables recoloring
+            newBuildablePI.isRightClickable = false;
 
             if (itemRotation == 0 || itemRotation == 180)
             {
-                newBuildablePI.objectGridSize = new Vector2(JSONManager.itemMods[index].x, JSONManager.itemMods[index].y);
+                newBuildablePI.objectGridSize = new Vector2(itemMod.x, itemMod.y);
             }
             else
             {
-                newBuildablePI.objectGridSize = new Vector2(JSONManager.itemMods[index].y, JSONManager.itemMods[index].x);
+                newBuildablePI.objectGridSize = new Vector2(itemMod.y, itemMod.x);
             }
 
             // Where you can place it
             Enums.ItemPlacementArea itemPlacementArea;
-            bool parsedSuccsefully = Enum.TryParse<Enums.ItemPlacementArea>(JSONManager.itemMods[index].itemPlacementArea, out itemPlacementArea);
+            bool parsedSuccsefully = Enum.TryParse<Enums.ItemPlacementArea>(itemMod.itemPlacementArea, out itemPlacementArea);
             if (parsedSuccsefully)
             {
                 newBuildablePI.itemPlacementArea = itemPlacementArea;
@@ -247,32 +267,32 @@ namespace ACEOCustomBuildables
             // Shadow Stuff
             if (item.transform.GetChild(0).GetChild(1).TryGetComponent<ShadowHandler>(out ShadowHandler shadowHandler))
             {
-                shadowHandler.shadowDistance = JSONManager.itemMods[index].shadowDistance;
+                shadowHandler.shadowDistance = itemMod.shadowDistance;
                 shadowHandler.SetShadowSprite(shadow.GetComponent<SpriteRenderer>().sprite);
                 shadowHandler.UpdateShadow();
             }
             else
             {
-                ACEOCustomBuildables.Log("[Mod Error] There is no shadow handler...? Item: " + JSONManager.itemMods[index].name);
+                ACEOCustomBuildables.Log("[Mod Error] There is no shadow handler...? Item: " + itemMod.name);
             }
             return item;
         }
 
-        private static Vector2 calculatOffest(int index)
+        private Vector2 calculatOffest(ItemMod itemMod)
         {
             Vector2 offset = Vector2.zero; 
-            if (JSONManager.itemMods[index].x % 2 == 0)
+            if (itemMod.x % 2 == 0)
             {
                 offset.x = 0.5f;
             }
-            if (JSONManager.itemMods[index].y % 2 == 0)
+            if (itemMod.y % 2 == 0)
             {
                 offset.y = 0.5f;
             }
             return offset;
         }
 
-        public static Vector3 calculateScale(GameObject texture, float x_input, float y_input)
+        public Vector3 calculateScale(GameObject texture, float x_input, float y_input)
         {
             Bounds textureBounds = texture.GetComponent<SpriteRenderer>().bounds;
             Vector2 bounds = new Vector2(textureBounds.size.x, textureBounds.size.y);
@@ -283,7 +303,7 @@ namespace ACEOCustomBuildables
             float x = x_input;
             float y = y_input;
 
-            if (texture.transform.parent.parent.rotation.eulerAngles.z == 90 || texture.transform.parent.parent.rotation.eulerAngles.z == 270)
+            if (texture.transform.rotation.eulerAngles.z == 90 || texture.transform.rotation.eulerAngles.z == 270)
             {
                 x = y_input;
                 y = x_input;
@@ -312,7 +332,7 @@ namespace ACEOCustomBuildables
             return new Vector3(scaleValueX, scaleValueY, 1f);
         }   
 
-        private static Material getSpriteNonLitMaterial()
+        private Material getSpriteNonLitMaterial()
         {
             return Singleton<BuildingController>.Instance.smallPlant.transform.GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().material;
         }

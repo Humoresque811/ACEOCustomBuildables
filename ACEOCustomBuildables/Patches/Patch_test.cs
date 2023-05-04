@@ -9,19 +9,27 @@ using PlacementStrategies;
 namespace ACEOCustomBuildables
 {
     
-    //[HarmonyPatch(typeof(OverlayHandler), "ToggleConstructionOverlay")]
+    [HarmonyPatch(typeof(DataPlaceholderMaterials), "GetFloorSprite")]
     static class Patch_test
     {
-        // This is a patch for various tests (generally for buggixes)! ----------------------------------------------------------------------------
-        /*public static void Postfix(OverlayHandler __instance, bool status)
+        public static bool Prefix(DataPlaceholderMaterials __instance, ref Sprite __result, int index)
         {
-            PlaceableItem item;
-            __instance.transform.parent.TryGetComponent<PlaceableItem>(out item);
-            if (item != null)
+            if (index < FileManager.Instance.floorIndexAddative)
             {
-                ACEOCustomBuildables.Log("test status is " + status.ToString() + " on item " + item.ObjectName);
-                ACEOCustomBuildables.Log("1st traverse result is " + Traverse.Create(__instance).Field<SpriteRenderer>("constructionOverlaySprite").Value.enabled.ToString());
+                return true;
             }
-        }*/
+
+            TexturedBuildableMod buildableMod = FileManager.Instance.buildableTypes[typeof(FloorMod)].Item2.buildableMods[index - FileManager.Instance.floorIndexAddative];
+            if (!FileManager.Instance.GetTextureSprite(buildableMod, out Sprite oSprite))
+            {
+                ACEOCustomBuildables.Log("[Mod Error] Failed to get texture sprite from index in floor patch...");
+                return true;
+            }
+
+            oSprite.texture.wrapMode = TextureWrapMode.Repeat;
+
+            __result = oSprite;
+            return false;
+        }
     }
 }

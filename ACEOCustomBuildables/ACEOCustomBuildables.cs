@@ -9,13 +9,18 @@ using HarmonyLib;
 
 namespace ACEOCustomBuildables
 {
-    [UMFHarmony(10)] //Set this to the number of harmony patches in your mod.
+    [UMFHarmony(12)] //Set this to the number of harmony patches in your mod.
     [UMFScript]
     class ACEOCustomBuildables : MonoBehaviour
     {
         internal static void Log(string text, bool clean = false)
         {
             using (UMFLog log = new UMFLog()) log.Log(text, clean);
+        }
+
+        internal static void SimpleLog(string message)
+        {
+            Log(message);
         }
 
         [UMFConfig]
@@ -33,15 +38,27 @@ namespace ACEOCustomBuildables
         {
             try
             {
-                string path = Path.Combine(Application.persistentDataPath, JSONManager.pathAddativeBase, JSONManager.pathAddativeItems);
-                Utils.CreateFolderIfNotExist(path);
-                ACEOCustomBuildables.Log("[Mod Success] Got/Created buildable folder");
-                JSONManager.basePath = path;
+                ACEOCustomBuildables.Log("[Mod Nuetral] Setting up creators!");
+                FileManager fileManager = this.gameObject.AddComponent<FileManager>();
+                fileManager.SetUp();
+
+                ItemModSourceCreator itemModSourceCreator = this.gameObject.AddComponent<ItemModSourceCreator>();
+                itemModSourceCreator.SetUp();
+                FloorModSourceCreator floorModSourceCreator = this.gameObject.AddComponent<FloorModSourceCreator>();
+                floorModSourceCreator.SetUp();
+
+                ItemCreator itemManager = this.gameObject.AddComponent<ItemCreator>();
+                itemManager.SetUp();
+                FloorCreator floorManager = this.gameObject.AddComponent<FloorCreator>();
+                floorManager.SetUp();
+
+                fileManager.SetUpBuildableTypes();
+                fileManager.SetUpBasePaths();
             }
             catch (Exception ex)
             {
-                ACEOCustomBuildables.Log("[Mod Error] Failed to get path. Error: " + ex.Message);
-            }   
+                ACEOCustomBuildables.Log("[Mod Error] Failed to set up buildable creators! Error: " + ex.Message);
+            }
         }
-	}
+    }
 }

@@ -44,8 +44,13 @@ namespace ACEOCustomBuildables
                         continue;
                     }
 
+                    if (itemCustomInfo.itemIndex == itemCustomInfo.nullInt)
+                    {
+                        return;
+                    }
+
                     // So if it is custom, then...
-                    CustomItemSerializable customItemSerializable = SaveLoadUtility.setSerializableInfo(itemCustomInfo.index, item);
+                    CustomItemSerializable customItemSerializable = SaveLoadUtility.SetSerializableInfo(itemCustomInfo.itemIndex, item);
                     if (customItemSerializable != null)
                     {
                         SaveLoadUtility.JSONInfoArray.Add(customItemSerializable);

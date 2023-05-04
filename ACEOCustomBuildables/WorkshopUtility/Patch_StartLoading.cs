@@ -16,8 +16,19 @@ namespace ACEOCustomBuildables
     {   
         public static void Prefix()
         {
-            ACEOCustomBuildables.Log("[Mod Nuetral] Started Loading workshop mods!");
-            JSONManager.modPaths = new List<string>(); // Clears list to avoid duplicates
+            try
+            {
+                ACEOCustomBuildables.Log("[Mod Nuetral] Started Loading workshop mods!");
+                foreach (Type type in FileManager.Instance.buildableTypes.Keys)
+                {
+                    BuildableClassHelper.GetBuildableSourceCreator(type, out IBuildableSourceCreator buildableSourceCreator);
+                    buildableSourceCreator.modPaths = new List<string>();
+                }
+            }
+            catch (Exception ex)
+            {
+                ACEOCustomBuildables.Log("Error: " + ex.Message);
+            }
         }
     }
 }

@@ -8,20 +8,50 @@ namespace ACEOCustomBuildables
 {
     class UIManager : MonoBehaviour
     {
-        public static List<GameObject> newIcons = new List<GameObject>();
+        private static List<int[]> otherVariations = new List<int[]>();
+        public static List<GameObject> floorIcons = new List<GameObject>();
+        public static List<GameObject> itemIcons = new List<GameObject>();
         public static bool UIFailed = false;
 
         public static void ClearUI()
         {
-            for (int i = 0; i < newIcons.Count; i++)
+            for (int i = 0; i < floorIcons.Count; i++)
             {
-                Destroy(newIcons[i]);
+                Destroy(floorIcons[i]);
             }
-            newIcons = new List<GameObject>();
+            floorIcons = new List<GameObject>();
+
+            for (int i = 0; i < itemIcons.Count; i++)
+            {
+                Destroy(itemIcons[i]);
+            }
+            itemIcons = new List<GameObject>();
+
+            otherVariations = new List<int[]>();
         }
 
         public static void CreateAllUI()
         {
+            if (FloorModSourceCreator.Instance.buildableMods.Count > 0)
+            {
+                // This is for variation compiling
+                List<FloorMod> floorMods = new List<FloorMod>();
+                foreach (TexturedBuildableMod buildableMod in FloorModSourceCreator.Instance.buildableMods)
+                {
+                    FloorMod floorMod = buildableMod as FloorMod;
+                    if (floorMod == null)
+                    {
+                        ACEOCustomBuildables.Log("[Mod Error] A buildable mod in FloorModSourceCreator is not a buildable mod!");
+                        continue;
+                    }
+
+                    floorMods.Add(floorMod);
+                }
+
+                otherVariations = GetVariationList(floorMods);
+            }
+
+
             foreach (Type type in FileManager.Instance.buildableTypes.Keys)
             {
                 List<TexturedBuildableMod> buildableMods = FileManager.Instance.buildableTypes[type].Item2.buildableMods;
@@ -35,18 +65,21 @@ namespace ACEOCustomBuildables
 
                 for (int i = 0; i < buildableMods.Count; i++)
                 {
-
-                    /*if (buildables[i].TryGetComponent<PlaceableFloor>(out PlaceableFloor placeableFloor))
+                    if (type != typeof(FloorMod))
                     {
-                        ACEOCustomBuildables.Log("has + " + placeableFloor.variationIndex.ToString());
+                        CreateUI(buildableMods[i], buildables[i], type);
                         continue;
+
+                    }
+
+                    if (ShouldCreateIcon(i, otherVariations))
+                    {
+                       CreateUI(buildableMods[i], buildables[i], type); 
                     }
                     else
                     {
-                        ACEOCustomBuildables.Log("doesnt");
-                    }*/
-
-                    CreateUI(buildableMods[i], buildables[i], type);
+                        floorIcons.Add(null);
+                    }
                 }
             }
         }
@@ -85,7 +118,18 @@ namespace ACEOCustomBuildables
 
                 buildUI.convertButtonToCustom();
 
-                newIcons.Add(newButton);
+                if (type == typeof(ItemMod))
+                {
+                    itemIcons.Add(newButton);
+                }
+                else if (type == typeof(FloorMod))
+                {
+                    floorIcons.Add(newButton);
+                }
+                else
+                {
+                    ACEOCustomBuildables.Log("[Mod Error] UI icon creators type not an expected type!");
+                }
                 ACEOCustomBuildables.Log("[Mod Success] Created UI button \"" + buildableMod.name + "\" successfully");
             }
             catch (Exception ex)
@@ -94,6 +138,100 @@ namespace ACEOCustomBuildables
             }
 
             UIFailed = false;
+        }
+
+        public static bool IndexHasVariations(int index)
+        {
+            if (otherVariations[index].Length != 1)
+            {
+                return true;
+            }
+
+            if (otherVariations[index][0] == -1)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static int[] GetAllVariations(int index)
+        {
+            List<int> ints = new List<int>
+            {
+                index
+            };
+            ints.AddRange(otherVariations[index]);
+            return ints.ToArray();
+        }
+
+        private static List<int[]> GetVariationList(in List<FloorMod> floorMods)
+        {
+            List<int[]> linkedIDs = new List<int[]>();
+            for (int i = 0; i < floorMods.Count; i++)
+            {
+                if (string.Equals(floorMods[i].floorVariationId, "None") || string.IsNullOrEmpty(floorMods[i].floorVariationId))
+                {
+                    linkedIDs.Add(new int[1] {-1});
+                    continue;
+                }
+
+                List<int> ints = new List<int>();
+                for (int k = 0; k < floorMods.Count; k++)
+                {
+                    if (i == k)
+                    {
+                        continue;
+                    }
+
+                    if (string.Equals(floorMods[i].floorVariationId, floorMods[k].floorVariationId))
+                    {
+                        ints.Add(k);
+                    }
+                }
+
+                linkedIDs.Add(ints.ToArray());
+            }
+
+            return linkedIDs;
+        }
+
+        private static bool ShouldCreateIcon(int index, in List<int[]> otherVariations)
+        {
+            ACEOCustomBuildables.Log("starte");
+            if (otherVariations[index].Length == 0)
+            {
+                return true;
+            }
+
+            if (otherVariations[index][0] == -1)
+            {
+                return true;
+            }
+
+            ACEOCustomBuildables.Log("started loop, elements " + otherVariations[index].Length);
+            bool otherIconIsCreated = false;
+            for (int i = 0; i < otherVariations[index].Length; i++)
+            {
+                ACEOCustomBuildables.Log("in loop i is " + i + " and other is " + otherVariations[index][i] + " third " + floorIcons.Count);
+
+                if (floorIcons.Count < otherVariations[index][i])
+                {
+                    return true;
+                }
+                if (floorIcons[otherVariations[index][i]] != null)
+                {
+                    otherIconIsCreated = true;
+                    ACEOCustomBuildables.Log("happened");
+                }
+            }
+
+            if (otherIconIsCreated)
+            {
+                ACEOCustomBuildables.Log("in");
+                return false;
+            }
+            return true;
         }
 	}
 }

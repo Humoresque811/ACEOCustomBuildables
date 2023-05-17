@@ -9,7 +9,7 @@ using HarmonyLib;
 
 namespace ACEOCustomBuildables
 {
-    [UMFHarmony(12)] //Set this to the number of harmony patches in your mod.
+    [UMFHarmony(17)] //Set this to the number of harmony patches in your mod.
     [UMFScript]
     class ACEOCustomBuildables : MonoBehaviour
     {

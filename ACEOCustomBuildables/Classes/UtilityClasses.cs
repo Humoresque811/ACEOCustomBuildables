@@ -39,22 +39,34 @@ namespace ACEOCustomBuildables
         public string referenceID;
     }
 
+    public class CustomFloorSerializable
+    {
+        public string modId;
+        public float[] position = new float[3];
+        public float[] size = new float[2];
+        public string tileType;
+        public int floor;
+    }
+
     // The Wrapper
-    public class CustomItemSerializableWrapper
+    public class CustomSerializableWrapper
     {
         public List<CustomItemSerializable> customItemSerializables;
+        public List<CustomFloorSerializable> customFloorSerializables;
 
         // Instantly set
-        public CustomItemSerializableWrapper(List<CustomItemSerializable> customItemSerializables)
+        public CustomSerializableWrapper(List<CustomItemSerializable> customItemSerializables, List<CustomFloorSerializable> customFloorSerializables)
         {
             this.customItemSerializables = new List<CustomItemSerializable>();
             this.customItemSerializables = customItemSerializables;
+            this.customFloorSerializables = customFloorSerializables;
         }
 
         // Set manually
-        public CustomItemSerializableWrapper()
+        public CustomSerializableWrapper()
         {
             this.customItemSerializables = new List<CustomItemSerializable>();
+            this.customFloorSerializables = new List<CustomFloorSerializable>();
         }
     }
 }

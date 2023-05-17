@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using HarmonyLib;
 using Newtonsoft.Json;
+using System.Runtime.CompilerServices;
 
 namespace ACEOCustomBuildables
 {
@@ -12,6 +13,13 @@ namespace ACEOCustomBuildables
     static class Patch_LoadPostfix
     {
         public static string savePath;
+        private static CustomSerializableWrapper loadedWrapper = null;
+
+        public static CustomSerializableWrapper LoadedWrapper 
+        { 
+            get { return loadedWrapper; } 
+            set { loadedWrapper = value; }
+        }
 
         [HarmonyPatch("StartNewGame")]
         public static void Prefix(SaveLoadGameDataController __instance)
@@ -32,62 +40,19 @@ namespace ACEOCustomBuildables
             Singleton<SceneMessagePanelUI>.Instance.SetLoadingText("Loading Saved Custom Buildables...", 97);
             SaveLoadUtility.quicklog("Starting Custom Load Round!", true);
 
-            // Make sure the diretory exists!
-            if (!Directory.Exists(savePath))
+            LoadedWrapper = GetCustomSaveData(savePath);
+
+            if (LoadedWrapper == null)
             {
-                SaveLoadUtility.quicklog("The save directory does not exist!", true);
                 return;
             }
-
-
-            // Path based stuff... Is there a file?
-            string path = Path.Combine(savePath, "CustomSaveData.json");
-            if (!File.Exists(path))
-            {
-                SaveLoadUtility.quicklog("The CustomSaveData.json file does not exist. Skipped loading.", false);
-                return;
-            }
-
-            string JSON;
-            try
-            {
-                // Read the file!
-                JSON = Utils.ReadFile(path);
-            }
-            catch (Exception ex)
-            {
-                SaveLoadUtility.quicklog("Failed to read JSON! Error: " + ex.Message, true);
-                return;
-            }
-            if (string.IsNullOrEmpty(JSON))
-            {
-                SaveLoadUtility.quicklog("Empty JSON string!", true);
-                return;
-            }
-
-            // Now we know that the string has something...
-            CustomItemSerializableWrapper customItemSerializableWrapper = null;
-            try
-            {
-                customItemSerializableWrapper = JsonConvert.DeserializeObject<CustomItemSerializableWrapper>(JSON);
-            }
-            catch (Exception ex)
-            {
-                SaveLoadUtility.quicklog("JSON deserialized failed! Error: " + ex.Message, true);
-                return;
-            }
-
-            if (customItemSerializableWrapper == null)
-            {
-                SaveLoadUtility.quicklog("JSON deserialized object is null!!", true);
-                return;
-            }
-
-            SaveLoadUtility.quicklog("A total of " + customItemSerializableWrapper.customItemSerializables.Count + " custom items were found and will be loaded/changed", false);
+            
+            SaveLoadUtility.quicklog("A total of " + LoadedWrapper.customItemSerializables.Count + " custom items were found and will be loaded/changed. " +
+                "A total of " + LoadedWrapper.customFloorSerializables.Count + " custom floors were found and will be loaded/changed", false);
 
             // Now we know the Item info is valid
             DynamicSimpleArray<PlaceableItem> itemsList = Singleton<BuildingController>.Instance.allItemsArray;
-            foreach (CustomItemSerializable customItem in customItemSerializableWrapper.customItemSerializables)
+            foreach (CustomItemSerializable customItem in LoadedWrapper.customItemSerializables)
             {
                 Vector3 customPostion = new Vector3(customItem.postion[0], customItem.postion[1], customItem.postion[2]);
                 float spriteRotation = customItem.spriteRotation;
@@ -150,6 +115,69 @@ namespace ACEOCustomBuildables
 
             Singleton<SceneMessagePanelUI>.Instance.SetLoadingText(LocalizationManager.GetLocalizedValue("SaveLoadGameDataController.cs.key.almost-done"), 100);
             SaveLoadUtility.quicklog("Custom items finished loading, without any errors!", true);
+
+            LoadedWrapper = null;
+        }
+
+        public static CustomSerializableWrapper GetCustomSaveData(string path)
+        {
+            if (LoadedWrapper != null)
+            {
+                return LoadedWrapper;
+            }
+
+            // Make sure the diretory exists!
+            if (!Directory.Exists(path))
+            {
+                SaveLoadUtility.quicklog("The save directory does not exist!", true);
+                return null;
+            }
+
+
+            // Path based stuff... Is there a file?
+            string extendedPath = Path.Combine(path, "CustomSaveData.json");
+            if (!File.Exists(extendedPath))
+            {
+                SaveLoadUtility.quicklog("The CustomSaveData.json file does not exist. Skipped loading.", false);
+                return null;
+            }
+
+            string JSON;
+            try
+            {
+                // Read the file!
+                JSON = Utils.ReadFile(extendedPath);
+            }
+            catch (Exception ex)
+            {
+                SaveLoadUtility.quicklog("Failed to read JSON! Error: " + ex.Message, true);
+                return null;
+            }
+            if (string.IsNullOrEmpty(JSON))
+            {
+                SaveLoadUtility.quicklog("Empty JSON string!", true);
+                return null;
+            }
+
+            // Now we know that the string has something...
+            CustomSerializableWrapper customItemSerializableWrapper = null;
+            try
+            {
+                customItemSerializableWrapper = JsonConvert.DeserializeObject<CustomSerializableWrapper>(JSON);
+            }
+            catch (Exception ex)
+            {
+                SaveLoadUtility.quicklog("JSON deserialized failed! Error: " + ex.Message, true);
+                return null;
+            }
+
+            if (customItemSerializableWrapper == null)
+            {
+                SaveLoadUtility.quicklog("JSON deserialized object is null!!", true);
+                return null;
+            }
+
+            return customItemSerializableWrapper;
         }
     }
 }

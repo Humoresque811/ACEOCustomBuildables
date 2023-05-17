@@ -74,16 +74,16 @@ namespace ACEOCustomBuildables
             return result;
         }
 
-        public bool GetShadowSprite(TexturedBuildableMod buildableMod, out Sprite sprite)
+        public bool GetShadowSprite(TexturedBuildableMod buildableMod, out Sprite sprite, int pixelsPerUnit = 256)
         {
-            bool result = GetTextureSpriteFromPath(buildableMod, "Shadow", out Sprite outSprite);
+            bool result = GetTextureSpriteFromPath(buildableMod, "Shadow", out Sprite outSprite, pixelsPerUnit);
             sprite = outSprite;
             return result;
         }
 
-        public bool GetIconSprite(TexturedBuildableMod buildableMod, out Sprite sprite)
+        public bool GetIconSprite(TexturedBuildableMod buildableMod, out Sprite sprite, int pixelsPerUnit = 256)
         {
-            bool result = GetTextureSpriteFromPath(buildableMod, "Icon", out Sprite outSprite);
+            bool result = GetTextureSpriteFromPath(buildableMod, "Icon", out Sprite outSprite, pixelsPerUnit);
             sprite = outSprite;
             return result;
         }

@@ -196,7 +196,7 @@ namespace ACEOCustomBuildables
             GameObject texture = sprite.transform.GetChild(0).gameObject;
             GameObject shadow = sprite.transform.GetChild(1).gameObject;
 
-            FileManager.Instance.GetTextureSprite(itemMod, out Sprite textureSprite);
+            FileManager.Instance.GetTextureSprite(itemMod, out Sprite textureSprite, 256);
             texture.GetComponent<SpriteRenderer>().sprite = textureSprite;
 
             FileManager.Instance.GetShadowSprite(itemMod, out Sprite shadowSprite);

@@ -10,7 +10,7 @@ namespace ACEOCustomBuildables
 {
     class FloorCreator : MonoBehaviour, IBuildableCreator
     {
-        public static FloorCreator Instance { get; set; }
+        public static FloorCreator Instance { get; private set; }
         public List<GameObject> buildables { get; set; }
 
         public void SetUp()
@@ -57,6 +57,16 @@ namespace ACEOCustomBuildables
                     placeableFloor.objectQuality = Enums.QualityType.Medium;
                     placeableFloor.hasVariations = true;
                     placeableFloor.variationIndex = FileManager.Instance.floorIndexAddative + i;
+                    placeableFloor.descriptionSizeModifier = 0.1f;
+
+                    placeableFloor.objectName = floorMod.name;
+                    placeableFloor.objectDescription = floorMod.description;
+
+                    FileManager.Instance.GetIconSprite(floorMod, out Sprite iconSprite);
+                    placeableFloor.descriptionSpriteOverrider = iconSprite;
+
+                    CustomItemSerializableComponent comp = newFloor.AddComponent<CustomItemSerializableComponent>();
+                    comp.Setup(i, typeof(FloorMod));
 
                     if (!newFloor.transform.GetChild(0).TryGetComponent<SpriteRenderer>(out SpriteRenderer spriteRenderer))
                     {
@@ -64,7 +74,7 @@ namespace ACEOCustomBuildables
                         continue;
                     }
 
-                    FileManager.Instance.GetTextureSprite(floorMod, out Sprite sprite);
+                    FileManager.Instance.GetTextureSprite(floorMod, out Sprite sprite, 256);
                     spriteRenderer.sprite = sprite;
                     spriteRenderer.drawMode = SpriteDrawMode.Tiled;
                     spriteRenderer.size = new Vector2(1, 1);
@@ -73,7 +83,7 @@ namespace ACEOCustomBuildables
                     buildables.Add(newFloor);
                     newFloor.SetActive(false);
 
-                    ACEOCustomBuildables.Log("[Mod Success] Created buildable item \"" + floorMod.name + "\" successfully!");
+                    ACEOCustomBuildables.Log("[Mod Success] Created buildable floor \"" + floorMod.name + "\" successfully!");
 
                     newFloor = null;
                 }

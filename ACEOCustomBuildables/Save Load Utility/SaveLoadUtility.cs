@@ -29,13 +29,10 @@ namespace ACEOCustomBuildables
         public static DynamicSimpleArray<AssetController> assetArray;
 
         // JSON vars
-        [SerializeField] public static List<CustomItemSerializable> JSONInfoArray = new List<CustomItemSerializable>(); // <-------------- Will be reconfigured in future update
+        [SerializeField] public static List<CustomItemSerializable> itemJSONList = new List<CustomItemSerializable>();
+        [SerializeField] public static List<CustomFloorSerializable> floorJSONList = new List<CustomFloorSerializable>();
 
         // Function Utilities
-        void Start()
-        {
-            quicklog("Save Load Utility is online with instance set!");
-        }
         public static void quicklog(string message, bool logAsUnityError = false)
         {
             if (logAsUnityError)
@@ -111,7 +108,7 @@ namespace ACEOCustomBuildables
             }
         }
 
-        public static CustomItemSerializable SetSerializableInfo(int index, PlaceableItem item)
+        public static CustomItemSerializable SetItemSerializableInfo(int index, PlaceableItem item)
         {
             try
             {
@@ -131,7 +128,33 @@ namespace ACEOCustomBuildables
             }
             catch (Exception ex)
             {
-                quicklog("Error occured it setting a serializable info class. Error: " + ex.Message, true);
+                quicklog("Error occured in setting a serializable item class. Error: " + ex.Message, true);
+                return null;
+            }
+        }
+
+        public static CustomFloorSerializable SetFloorSeializableInfo(int index, MergedTile mergedTile)
+        {
+            try
+            {
+                CustomFloorSerializable returnFloor = new CustomFloorSerializable();
+                returnFloor.modId = FloorModSourceCreator.Instance.buildableMods[index].id;
+
+                returnFloor.position[0] = mergedTile.transform.position.x;
+                returnFloor.position[1] = mergedTile.transform.position.y;
+                returnFloor.position[2] = mergedTile.transform.position.z;
+
+                returnFloor.size[0] = mergedTile.spriteRenderer.size[0];
+                returnFloor.size[1] = mergedTile.spriteRenderer.size[1];
+
+                returnFloor.tileType = mergedTile.TileType.ToString();
+                returnFloor.floor = mergedTile.Floor;
+
+                return returnFloor;
+            }
+            catch (Exception ex)
+            {
+                quicklog("Error occured in setting a serializable floor class. Error: " + ex.Message, true);
                 return null;
             }
         }
@@ -144,8 +167,15 @@ namespace ACEOCustomBuildables
         /// <param name="fileName">If you want to use a custom file name, specify it</param>
         public static void createJSON(string path, string fileName = "CustomSaveData.json")
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+
+            bool save = false;
             // Make sure the array isn't empty!
-            if (JSONInfoArray == null || JSONInfoArray.Count == 0 || string.IsNullOrEmpty(path))
+            //if (floorJSONList != null && )
+            if (!((itemJSONList != null && itemJSONList.Count != 0) || (floorJSONList != null && floorJSONList.Count != 0)))
             {
                 return;
             }
@@ -178,7 +208,7 @@ namespace ACEOCustomBuildables
 
             // JSON creation vars and systems
             string JSON;
-            CustomItemSerializableWrapper JSONWrapper = new CustomItemSerializableWrapper(JSONInfoArray);
+            CustomSerializableWrapper JSONWrapper = new CustomSerializableWrapper(itemJSONList, floorJSONList);
             try
             {
                 JSON = JsonConvert.SerializeObject(JSONWrapper, Formatting.Indented); // We pretty print :)

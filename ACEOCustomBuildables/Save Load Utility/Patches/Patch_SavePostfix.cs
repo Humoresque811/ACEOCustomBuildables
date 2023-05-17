@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using HarmonyLib;
+using System.Linq;
 
 namespace ACEOCustomBuildables
 {
@@ -39,24 +40,46 @@ namespace ACEOCustomBuildables
             {
                 foreach (PlaceableItem item in SaveLoadUtility.itemArray.ToList())
                 {
-                    if (!item.gameObject.TryGetComponent<CustomItemSerializableComponent>(out CustomItemSerializableComponent itemCustomInfo))
+                    if (!item.gameObject.TryGetComponent<CustomItemSerializableComponent>(out CustomItemSerializableComponent serializableComponent))
                     {
                         continue;
                     }
 
-                    if (itemCustomInfo.itemIndex == itemCustomInfo.nullInt)
+                    if (serializableComponent.itemIndex == serializableComponent.nullInt)
                     {
-                        return;
+                        continue;
                     }
 
                     // So if it is custom, then...
-                    CustomItemSerializable customItemSerializable = SaveLoadUtility.SetSerializableInfo(itemCustomInfo.itemIndex, item);
+                    CustomItemSerializable customItemSerializable = SaveLoadUtility.SetItemSerializableInfo(serializableComponent.itemIndex, item);
                     if (customItemSerializable != null)
                     {
-                        SaveLoadUtility.JSONInfoArray.Add(customItemSerializable);
+                        SaveLoadUtility.itemJSONList.Add(customItemSerializable);
                         continue;
                     }
                     SaveLoadUtility.quicklog("Custom Serializable item was null!", false);
+                }
+
+                foreach (MergedTile mergedTile in SaveLoadUtility.zonesArray.ToList())
+                {
+                    if (!mergedTile.gameObject.TryGetComponent<CustomItemSerializableComponent>(out CustomItemSerializableComponent serializableComponent))
+                    {
+                        continue;
+                    }
+
+                    if (serializableComponent.floorIndex == serializableComponent.nullInt)
+                    {
+                        continue;
+                    }
+
+                    // So if it is custom, then...
+                    CustomFloorSerializable customFloorSerializable = SaveLoadUtility.SetFloorSeializableInfo(serializableComponent.floorIndex, mergedTile);
+                    if (customFloorSerializable != null)
+                    {
+                        SaveLoadUtility.floorJSONList.Add(customFloorSerializable);
+                        continue;
+                    }
+                    SaveLoadUtility.quicklog("Custom Serializable floor was null!", false);
                 }
 
                 if (string.IsNullOrEmpty(inputSavePath))
@@ -74,7 +97,8 @@ namespace ACEOCustomBuildables
 
             // Revert Game World after saving  <---------------------------------------- IMPORTANT
             SaveLoadUtility.revetGameAfterSaving();
-            SaveLoadUtility.JSONInfoArray.Clear();
+            SaveLoadUtility.itemJSONList = new List<CustomItemSerializable>();
+            SaveLoadUtility.floorJSONList = new List<CustomFloorSerializable>();
         }
     }
 }

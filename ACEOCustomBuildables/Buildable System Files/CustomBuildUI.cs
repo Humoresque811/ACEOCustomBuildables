@@ -48,6 +48,7 @@ namespace ACEOCustomBuildables
             Singleton<VariationsHandler>.Instance.TogglePanel(false);
             try
             {
+                assignedAnimator.Play("BounceButton");
                 Singleton<AudioController>.Instance.PlayAudio(Enums.AudioClip.PointerEnter, true, 1f, 1f, false);
                 ObjectDescriptionPanelUI ObjectDescriptionPanel = Singleton<ObjectDescriptionPanelUI>.Instance;
                 ObjectDescriptionPanel.ShowTemplatePanel(assignedButton.transform, buildableName, buildableDescription);
@@ -55,7 +56,23 @@ namespace ACEOCustomBuildables
                 ObjectDescriptionPanel.operatingCostText.text = $"{LocalizationManager.GetLocalizedValue("ObjectDescriptionPanelUI.cs.key.27")} {buildableOperatingCost}";
                 ObjectDescriptionPanel.objectImageInstructionText.text = "No Preview Availible For Custom Buildables...";
 
-                assignedAnimator.Play("BounceButton");
+                if (this.modType != typeof(FloorMod))
+                {
+                    return;
+                }
+
+                if (!assignedObject.TryGetComponent<CustomItemSerializableComponent>(out CustomItemSerializableComponent comp))
+                {
+                    return;
+                }
+
+                ACEOCustomBuildables.Log(UIManager.IndexHasVariations(comp.floorIndex).ToString() + " and " + comp.floorIndex);
+                if (!UIManager.IndexHasVariations(comp.floorIndex))
+                {
+                    return;
+                }
+
+                Singleton<VariationsHandler>.Instance.SetVariations(assignedObject.GetComponent<PlaceableObject>(), this.transform, Color.white);
             }
             catch (Exception ex)
             {
@@ -67,8 +84,8 @@ namespace ACEOCustomBuildables
         {
             try
             {
-                assignedAnimator.Play("BounceDown");
-                Singleton<ObjectDescriptionPanelUI>.Instance.HidePanel();
+                //assignedAnimator.Play("BounceDown");
+                //Singleton<ObjectDescriptionPanelUI>.Instance.HidePanel();
             }
             catch (Exception ex)
             {

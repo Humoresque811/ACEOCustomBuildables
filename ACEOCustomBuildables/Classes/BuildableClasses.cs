@@ -46,6 +46,6 @@ namespace ACEOCustomBuildables
     // Floor mod
     public class FloorMod : TexturedBuildableMod
     {
-        // This is here for ease of use...
+        public string floorVariationId;
     }
 }

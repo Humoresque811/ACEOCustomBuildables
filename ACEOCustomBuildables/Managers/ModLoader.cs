@@ -50,17 +50,10 @@ namespace ACEOCustomBuildables
                 BuildableClassHelper.GetBuildableCreator(type, out IBuildableCreator buildableCreator);
                 buildableCreator.ClearBuildables();
                 buildableCreator.CreateBuildables();
+                ACEOCustomBuildables.Log($"[Mod Success] {buildableCreator.GetType().Name} finished creating buildables, creating {buildableCreator.buildables.Count} buildable(s)");
             }
 
-            if (ItemCreator.Instance.itemsFailed)
-            {
-                ACEOCustomBuildables.Log("[Mod Error] There was an error creating an item mod (see above). Mod loading will countinue.");
-            }
-            else
-            {
-                ACEOCustomBuildables.Log("[Mod Success] Ended creating buildables. Created " + ItemCreator.Instance.buildables.Count + " buildable item(s)");
-            }
-
+            UIManager.ClearUI();
             UIManager.CreateAllUI();
             if (UIManager.UIFailed)
             {
@@ -68,7 +61,7 @@ namespace ACEOCustomBuildables
             }
             else
             {
-                ACEOCustomBuildables.Log("[Mod Success] Ended creating UI. Created " + UIManager.newIcons.Count + " UI button(s)");
+                ACEOCustomBuildables.Log("[Mod Success] Ended creating UI. Created " + (UIManager.floorIcons.Count + UIManager.itemIcons.Count) + " UI button(s)");
             }
         }
 	}

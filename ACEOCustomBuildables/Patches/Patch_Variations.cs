@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using PlacementStrategies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,6 @@ namespace ACEOCustomBuildables
                     return;
                 }
 
-                ACEOCustomBuildables.Log(__instance.variationIndex.ToString());
                 if (__instance.variationIndex < FileManager.Instance.floorIndexAddative)
                 {
                     return;
@@ -61,35 +61,40 @@ namespace ACEOCustomBuildables
                 return;
             }
 
-            __instance.objectImageTransform.localScale = new Vector3(64f, 64f, 64f);
+            __instance.objectImageTransform.localScale = new Vector3(256f, 256f, 256f);
         }
     }
 
-    [HarmonyPatch(typeof(ObjectPlacementController), "SetObject")]
+    [HarmonyPatch(typeof(PlaceObjectSquareDrag), "PlaceObject")]
     class Path_VariationPlacementSpriteScaler
     {
-        public static void Prefix(ObjectPlacementController __instance, GameObject obj)
+        public static void Prefix(PlaceObjectSquareDrag __instance, GameObject currentObject, PlaceableObject placeableObject)
         {
-            if (!obj.TryGetComponent<PlaceableFloor>(out PlaceableFloor plo))
+            if (!currentObject.TryGetComponent<PlaceableFloor>(out PlaceableFloor plo))
             {
                 return;
             }
 
-            if (!obj.TryGetComponent<CustomItemSerializableComponent>(out CustomItemSerializableComponent comp))
+            if (!currentObject.TryGetComponent<CustomItemSerializableComponent>(out CustomItemSerializableComponent comp))
             {
                 if (plo.variationIndex < FileManager.Instance.floorIndexAddative)
                 {
                     return;
                 }
 
-                obj = FloorCreator.Instance.buildables[plo.variationIndex - FileManager.Instance.floorIndexAddative];
-                //comp = obj.AddComponent<CustomItemSerializableComponent>();
-                //comp.Setup(plo.variationIndex - FileManager.Instance.floorIndexAddative, typeof(FloorMod));
+                currentObject = GameObject.Instantiate(FloorCreator.Instance.buildables[plo.variationIndex - FileManager.Instance.floorIndexAddative]);
             }
 
-            Transform sprite = obj.transform.Find("Sprite");
-            sprite.localScale = Vector3.one;
-            sprite.localScale = ItemCreator.Instance.calculateScale(sprite.gameObject, 1, 1);
+            currentObject.SetActive(true);
+            SpriteRenderer renderer = placeableObject.spriteTransform.GetComponent<SpriteRenderer>();
+
+            FileManager.Instance.GetTextureSprite(FloorModSourceCreator.Instance.buildableMods[plo.variationIndex - FileManager.Instance.floorIndexAddative], out Sprite sprite, 512);
+            renderer.sprite = sprite;
+            renderer.drawMode = SpriteDrawMode.Tiled;
+            renderer.tileMode = SpriteTileMode.Continuous;
+            renderer.size = new Vector2(0.5f, 0.5f);
+
+            placeableObject.spriteTransform.localScale = new Vector3(2, 2, 1);
         }
     }
 

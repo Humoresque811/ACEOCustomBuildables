@@ -78,7 +78,7 @@ namespace ACEOCustomBuildables
                     spriteRenderer.sprite = sprite;
                     spriteRenderer.drawMode = SpriteDrawMode.Tiled;
                     spriteRenderer.size = new Vector2(1, 1);
-                    newFloor.transform.GetChild(0).localScale = ItemCreator.Instance.calculateScale(newFloor.transform.GetChild(0).gameObject, 1f, 1f);
+                    newFloor.transform.GetChild(0).localScale = new Vector3(1, 1, 1); //ItemCreator.Instance.calculateScale(newFloor.transform.GetChild(0).gameObject, 1f, 1f);
 
                     buildables.Add(newFloor);
                     newFloor.SetActive(false);

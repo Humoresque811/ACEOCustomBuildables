@@ -66,7 +66,6 @@ namespace ACEOCustomBuildables
                     return;
                 }
 
-                ACEOCustomBuildables.Log(UIManager.IndexHasVariations(comp.floorIndex).ToString() + " and " + comp.floorIndex);
                 if (!UIManager.IndexHasVariations(comp.floorIndex))
                 {
                     return;
@@ -84,8 +83,7 @@ namespace ACEOCustomBuildables
         {
             try
             {
-                //assignedAnimator.Play("BounceDown");
-                //Singleton<ObjectDescriptionPanelUI>.Instance.HidePanel();
+                assignedAnimator.Play("BounceDown");
             }
             catch (Exception ex)
             {

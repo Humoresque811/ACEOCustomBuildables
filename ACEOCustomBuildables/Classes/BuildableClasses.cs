@@ -13,8 +13,6 @@ namespace ACEOCustomBuildables
         public string id;
         public string description;
         public string buildMenu;
-        public int buildCost;
-        public int operationCost;
         public string pathToUse; //This is used and created by JSON Manager, not to be inputted
     }
 
@@ -36,6 +34,8 @@ namespace ACEOCustomBuildables
     {
         public int x;
         public int y;
+        public int buildCost;
+        public int operationCost;
         public string itemPlacementArea;
         public bool useRandomRotation;
         public int constructionEnergy;

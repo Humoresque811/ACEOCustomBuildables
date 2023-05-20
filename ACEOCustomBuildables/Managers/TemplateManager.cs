@@ -11,7 +11,6 @@ namespace ACEOCustomBuildables
     {
         // Templates
         public static Dictionary<string, GameObject> UIPanels { get; private set; }
-        public static GameObject Panel_DecorationGroup;
         public static GameObject ItemTemplate;
         public static GameObject FloorTemplate;
         public static ObjectPlacementController objectPlacementControllerTemplate; 

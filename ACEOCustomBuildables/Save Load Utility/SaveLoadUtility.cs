@@ -172,7 +172,6 @@ namespace ACEOCustomBuildables
                 return;
             }
 
-            bool save = false;
             // Make sure the array isn't empty!
             //if (floorJSONList != null && )
             if (!((itemJSONList != null && itemJSONList.Count != 0) || (floorJSONList != null && floorJSONList.Count != 0)))

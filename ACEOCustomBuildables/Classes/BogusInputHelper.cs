@@ -32,10 +32,23 @@ namespace ACEOCustomBuildables
 
             currentDialog = $"[Buildable Non-Critical Issue] Your mod called {BuildableClassHelper.GetModIdentification(floorMod)} seems to have";
 
-            CheckIntModAttribute(ref floorMod.buildCost, 1, -1, "a build cost");
-            CheckIntModAttribute(ref floorMod.operationCost, 1, -1, "an operation cost");
-
             CheckStringModAttribute(ref floorMod.buildMenu, TemplateManager.UIPanels.Keys.ToArray(), "a buildMenu value");
+            
+            FileManager.Instance.GetTextureSprite(floorMod, out Sprite sprite);
+
+            if (sprite.texture.width != sprite.texture.height)
+            {
+                string message = $"{currentDialog} a texture sprite that is not square, and therefore may be buggy!";
+                ACEOCustomBuildables.Log(message);
+                DialogPanel.Instance.ShowMessagePanel(message);
+            }
+
+            if (sprite.texture.width != 256)
+            {
+                string message2 = $"{currentDialog} a texture sprite that is not 256x256. This size is recomended for preformance/scaling reasons, and therefore may be buggy!";
+                ACEOCustomBuildables.Log(message2);
+                DialogPanel.Instance.ShowMessagePanel(message2);
+            }
         }
 
         public static void CheckItemMod(ItemMod itemMod, Action<string> logger)

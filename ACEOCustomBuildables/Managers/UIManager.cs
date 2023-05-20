@@ -108,8 +108,18 @@ namespace ACEOCustomBuildables
 
                 buildUI.buildableName = buildableMod.name;
                 buildUI.buildableDescription = buildableMod.description;
-                buildUI.buildableCost = buildableMod.buildCost;
-                buildUI.buildableOperatingCost = buildableMod.operationCost;
+
+                ItemMod itemMod = buildableMod as ItemMod;
+                if (itemMod != null)
+                {
+                    buildUI.buildableCost = itemMod.buildCost;
+                    buildUI.buildableOperatingCost = itemMod.operationCost;
+                }
+                else
+                {
+                    buildUI.buildableCost = 2;
+                    buildUI.buildableOperatingCost = 0;
+                }
 
                 buildUI.assignedButton = newButton.GetComponent<Button>();
                 buildUI.assignedObject = buildable;
@@ -198,7 +208,6 @@ namespace ACEOCustomBuildables
 
         private static bool ShouldCreateIcon(int index, in List<int[]> otherVariations)
         {
-            ACEOCustomBuildables.Log("starte");
             if (otherVariations[index].Length == 0)
             {
                 return true;
@@ -209,26 +218,22 @@ namespace ACEOCustomBuildables
                 return true;
             }
 
-            ACEOCustomBuildables.Log("started loop, elements " + otherVariations[index].Length);
             bool otherIconIsCreated = false;
             for (int i = 0; i < otherVariations[index].Length; i++)
             {
-                ACEOCustomBuildables.Log("in loop i is " + i + " and other is " + otherVariations[index][i] + " third " + floorIcons.Count);
-
                 if (floorIcons.Count < otherVariations[index][i])
                 {
-                    return true;
+                    continue;
                 }
+
                 if (floorIcons[otherVariations[index][i]] != null)
                 {
                     otherIconIsCreated = true;
-                    ACEOCustomBuildables.Log("happened");
                 }
             }
 
             if (otherIconIsCreated)
             {
-                ACEOCustomBuildables.Log("in");
                 return false;
             }
             return true;

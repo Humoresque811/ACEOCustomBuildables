@@ -9,8 +9,8 @@ namespace ACEOCustomBuildables
 {
     public class ACEOCustomBuildablesConfig
     {
-        private static readonly string configVersion = "1.0";
-        public static string displayConfigVersion = "v1.1 Internal Test Version";
+        private static readonly string configVersion = "1.1";
+        public static string displayConfigVersion = "v1.1 Beta 1";
 
         //Add your config vars here.
         public static bool disableRandomRotation = false;

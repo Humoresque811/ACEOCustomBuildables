@@ -29,7 +29,9 @@ namespace ACEOCustomBuildables
 
             if (Patch_LoadPostfix.LoadedWrapper == null)
             {
-                ACEOCustomBuildables.Log("[Mod Error] Loaded wrapper was null, so the setTile system can't set tiles!");
+                ACEOCustomBuildables.Log("[Mod Error] Loaded wrapper was null, so the setTile system can't set tiles! (If you see this error, then " +
+                    "ACEO Custom Buildables has been added to a game, used, and then removed, then the game was saved, and then ACEO CB was re-added. This can cuase significant game damage!" +
+                    " If you need help, contact Humoresque.)");
                 return;
             }
 

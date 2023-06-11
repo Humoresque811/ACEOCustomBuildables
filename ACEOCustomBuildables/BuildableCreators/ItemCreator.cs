@@ -89,7 +89,7 @@ namespace ACEOCustomBuildables
             ItemMod itemMod = FileManager.Instance.buildableTypes[typeof(ItemMod)].Item2.buildableMods[index] as ItemMod;
             if (itemMod == null)
             {
-                ACEOCustomBuildables.Log("[Mod Error] A buildable mod of itemSOurceCreators is not an item mod!");
+                ACEOCustomBuildables.Log("[Mod Error] A buildable mod of itemSourceCreators is not an item mod!");
                 return;
             }
 

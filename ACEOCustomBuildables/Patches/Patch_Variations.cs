@@ -61,7 +61,7 @@ namespace ACEOCustomBuildables
                 return;
             }
 
-            __instance.objectImageTransform.localScale = new Vector3(256f, 256f, 256f);
+            __instance.objectImageTransform.localScale = new Vector3(128f, 128f, 1f);
         }
     }
 

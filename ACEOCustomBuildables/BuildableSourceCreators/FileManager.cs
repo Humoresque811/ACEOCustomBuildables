@@ -27,6 +27,7 @@ namespace ACEOCustomBuildables
 
         public void SetUpBuildableTypes()
         {
+            ACEOCustomBuildables.Log("[Mod Init] Setting up Custom Buidables types!");
             this.buildableTypes = new Dictionary<Type, Tuple<string, IBuildableSourceCreator, IBuildableCreator>>();
 
             Tuple<string, IBuildableSourceCreator, IBuildableCreator> itemTuple = new Tuple<string, IBuildableSourceCreator, IBuildableCreator>("Items", ItemModSourceCreator.Instance, ItemCreator.Instance);
@@ -38,7 +39,7 @@ namespace ACEOCustomBuildables
 
         public void SetUpBasePaths()
         {
-            ACEOCustomBuildables.Log("[Mod Nuetral] Starting basepath initilization!");
+            ACEOCustomBuildables.Log("[Mod Init] Starting basepath initilization!");
             try
             {
                 string basePath = Path.Combine(Application.persistentDataPath, pathAddativeBase);

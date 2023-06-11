@@ -1,6 +1,6 @@
 Airport CEO Custom Buildables:
 
-ACEO Custom Buildables allows for you to add items to the game, from 
+ACEO Custom Buildables allows for you to add items and floors to the game, from 
 * The Steam Workshop
 * The Native Mods Folder
 * A new folder in the LocalLow ACEO folder (for mod development)
@@ -18,17 +18,27 @@ To remove mods:
 5. Keep having fun!
 
 Known Issues:
-* When the monetary unit is not dollars, the value does not adjust to the new currency, is still the raw input value
 * Using template tool will result in the item returning to a normal plant
 * May be unstable on Mac (I can't test!)
 
 Developed by Humoresque, with help from Zekew
 
 Changelog:
+1.1
+* Epic: Custom Flooring!
+* New Feature: New bogus input checker, allowing more fields to be checked. Streamlined system
+* New Feature: The specific menu for UI Icons can now be specified with some restrictions
+* New Feature: Floors (and only floors) can have variations
+* Improvement: Cost text in Object Description Panel now changes with the game language
+* Code Improvement: Reduced use of static class, instead opting for Interfaces and initialization upon game load
+  * Other more complex but useful coding systems put in place
+* Code Improvement: Completly new mod loading system
+* Code Improvement: Better JSON/Image loading system
+
 1.0.1
 * Bug Fix: Fixed paths not working on mac
 
 1.0:
 * Epic: All basic systems work
-* Feature: Steam Workshop downloading option
-* Feature: Save - Load compatability
+* New Feature: Steam Workshop downloading option
+* New Feature: Save - Load compatability

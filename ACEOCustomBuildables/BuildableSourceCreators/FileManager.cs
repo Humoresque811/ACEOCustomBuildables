@@ -45,7 +45,7 @@ namespace ACEOCustomBuildables
                 string basePath = Path.Combine(Application.persistentDataPath, pathAddativeBase);
                 if (!Directory.Exists(basePath))
                 {
-                    ACEOCustomBuildables.Log("[Mod Nuetral] Basepath does not exist. Creating folder!");
+                    ACEOCustomBuildables.Log("[Mod Neutral] Basepath does not exist. Creating folder!");
                     Utils.CreateFolderIfNotExist(basePath);
                 }
                 this.basePath = basePath;
@@ -55,7 +55,7 @@ namespace ACEOCustomBuildables
                     string extendedPath = Path.Combine(basePath, buildableTypes[type].Item1);
                     if (!Directory.Exists(extendedPath))
                     {
-                        ACEOCustomBuildables.Log($"[Mod Nuetral] The folder for buildable type \"{buildableTypes[type].Item1}\" does not exist. Creating folder!");
+                        ACEOCustomBuildables.Log($"[Mod Neutral] The folder for buildable type \"{buildableTypes[type].Item1}\" does not exist. Creating folder!");
                         Utils.CreateFolderIfNotExist(extendedPath);
                     }
                 }
@@ -194,12 +194,12 @@ namespace ACEOCustomBuildables
             {
                 BuildableClassHelper.GetBuildablePathExtension(modtype, out string pathExtension);
                 path = Path.Combine(basePath, pathExtension);
-                logger.Invoke("[Mod Nuetral] Started reading the LocalLow buildables folder");
+                logger.Invoke("[Mod Neutral] Started reading the LocalLow buildables folder");
                 return false;
             }
             else
             {
-                logger.Invoke("[Mod Nuetral] Started reading a folder (Workshop or Native mod folder)");
+                logger.Invoke("[Mod Neutral] Started reading a folder (Workshop or Native mod folder)");
                 return true;
             }
         }

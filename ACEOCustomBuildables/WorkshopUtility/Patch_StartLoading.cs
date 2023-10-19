@@ -18,7 +18,7 @@ namespace ACEOCustomBuildables
         {
             try
             {
-                ACEOCustomBuildables.Log("[Mod Nuetral] Started Loading workshop mods!");
+                ACEOCustomBuildables.Log("[Mod Neutral] Started Loading workshop mods!");
                 foreach (Type type in FileManager.Instance.buildableTypes.Keys)
                 {
                     BuildableClassHelper.GetBuildableSourceCreator(type, out IBuildableSourceCreator buildableSourceCreator);

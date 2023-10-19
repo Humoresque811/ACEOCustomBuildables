@@ -38,7 +38,7 @@ namespace ACEOCustomBuildables
         {
             try
             {
-                ACEOCustomBuildables.Log("[Mod Nuetral] Setting up creators!");
+                ACEOCustomBuildables.Log("[Mod Neutral] Setting up creators!");
                 FileManager fileManager = this.gameObject.AddComponent<FileManager>();
                 fileManager.SetUp();
 

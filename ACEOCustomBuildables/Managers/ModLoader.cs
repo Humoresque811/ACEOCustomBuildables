@@ -22,7 +22,7 @@ namespace ACEOCustomBuildables
     {
         public static void LoadMods()
         {
-            ACEOCustomBuildables.Log("[Mod Nuetral] Started loading mod info!");
+            ACEOCustomBuildables.Log("[Mod Neutral] Started loading mod info!");
             Singleton<SceneMessagePanelUI>.Instance.SetLoadingText("Creating Custom Buildables...", 5);
             if (!TemplateManager.GetAllTemplates())
             {

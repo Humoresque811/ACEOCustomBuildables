@@ -263,13 +263,13 @@ namespace ACEOCustomBuildables
             {
                 newBuildablePI.itemPlacementArea = Enums.ItemPlacementArea.Both;
             }
-
-            // Shadow Stuff
+            
+            // Shadow Stuff 
             if (item.transform.GetChild(0).GetChild(1).TryGetComponent<ShadowHandler>(out ShadowHandler shadowHandler))
             {
                 shadowHandler.shadowDistance = itemMod.shadowDistance;
                 shadowHandler.SetShadowSprite(shadow.GetComponent<SpriteRenderer>().sprite);
-                shadowHandler.UpdateShadow();
+                //shadowHandler.UpdateShadow(); BROKEN AS OF ACEO 1.1 (Custom buildables 1.1.1 fixed)
             }
             else
             {

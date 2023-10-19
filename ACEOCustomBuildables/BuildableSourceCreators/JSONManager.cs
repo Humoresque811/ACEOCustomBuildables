@@ -50,11 +50,11 @@ namespace ACEOCustomBuildables
             if (string.IsNullOrEmpty(path))
             {
                 path = FileManager.Instance.basePath;
-                ACEOCustomBuildables.Log("[Mod Nuetral] Started reading the LocalLow buildables folder");
+                ACEOCustomBuildables.Log("[Mod Neutral] Started reading the LocalLow buildables folder");
             }
             else
             {
-                ACEOCustomBuildables.Log("[Mod Nuetral] Started reading a folder (Workshop or Native mod folder)");
+                ACEOCustomBuildables.Log("[Mod Neutral] Started reading a folder (Workshop or Native mod folder)");
                 giveUsePath = true;
             }
 

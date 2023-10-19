@@ -22,7 +22,7 @@ namespace ACEOCustomBuildables
                 return;
             }
 
-            logger("[Mod Nuetral] Starting to open game log!");
+            logger("[Mod Neutral] Starting to open game log!");
 
             try
             {

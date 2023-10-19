@@ -22,7 +22,7 @@ namespace ACEOCustomBuildables
                 {
                     continue;
                 }
-                ACEOCustomBuildables.Log("[Mod Nuetral] Started loading a mod from the workshop!");
+                ACEOCustomBuildables.Log("[Mod Neutral] Started loading a mod from the workshop!");
 
                 string basePath = Path.Combine(path, FileManager.Instance.pathAddativeBase);
                 if (Workshoputility.CheckIfFolderValid(basePath, out Type modType, out string extendedPath))

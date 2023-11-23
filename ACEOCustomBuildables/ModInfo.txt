@@ -24,6 +24,11 @@ Known Issues:
 Developed by Humoresque, with help from Zekew
 
 Changelog:
+1.2
+* Epic: Custom Tileables!
+* Bug Fix: Reduced severity of minor error log message, because the message itself would cause loading to fail
+* Code Improvement: Slightly re-organized file structure
+
 1.1.1
 * Bug Fix: Mod broken due to Airport CEO update
 * Bug Fix: Incorrect spelling of a log message

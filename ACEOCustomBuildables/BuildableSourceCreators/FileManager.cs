@@ -1,7 +1,9 @@
-﻿using System;
+﻿using FSG.MeshAnimator;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -18,6 +20,7 @@ namespace ACEOCustomBuildables
 
         public readonly string pathAddativeBase = "Buildables";
         public readonly int floorIndexAddative = 100;
+        public readonly int tileableIndexAddative = 100;
 
         public void SetUp()
         {
@@ -35,6 +38,9 @@ namespace ACEOCustomBuildables
 
             Tuple<string, IBuildableSourceCreator, IBuildableCreator> floorTuple = new Tuple<string, IBuildableSourceCreator, IBuildableCreator>("Floors", FloorModSourceCreator.Instance, FloorCreator.Instance);
             buildableTypes.Add(typeof(FloorMod), floorTuple);
+
+            Tuple<string, IBuildableSourceCreator, IBuildableCreator> tileableTuple = new Tuple<string, IBuildableSourceCreator, IBuildableCreator>("Tileables", TileableSourceCreator.Instance, TileableCreator.Instance);
+            buildableTypes.Add(typeof(TileableMod), tileableTuple);
         }
 
         public void SetUpBasePaths()
@@ -170,6 +176,59 @@ namespace ACEOCustomBuildables
 
             // If it doesn't exist, return this
             sprite = Singleton<DataPlaceholderItems>.Instance.smallPlantIcon;
+            return false;
+        }
+
+        public bool GetTexture2DFromPath(TexturedBuildableMod buildableMod, out Texture2D texture2D)
+        {
+            string path;
+            string pathAddative = "";
+
+            if (string.IsNullOrEmpty(buildableMod.pathToUse))
+            {
+                foreach (Type type in this.buildableTypes.Keys)
+                {
+                    if (Type.Equals(type, buildableMod.GetType()))
+                    {
+                        pathAddative = this.buildableTypes[type].Item1;
+                    }
+                }
+                if (String.IsNullOrEmpty(pathAddative))
+                {
+                    ACEOCustomBuildables.Log($"[Mod Error] Buildable mod to get texture2D for is not a valid type (being {buildableMod.GetType()}).");
+                    texture2D = null;
+                    return false;
+                }
+
+                path = Path.Combine(basePath, pathAddative) + Path.DirectorySeparatorChar;
+            }
+            else
+            {
+                path = buildableMod.pathToUse + Path.DirectorySeparatorChar;
+            }
+
+            path += buildableMod.texturePath;
+
+            // If texture keyword correct, then check if it exists
+            if (File.Exists(path))
+            {
+                // This should be whats returned
+			    byte[] data = File.ReadAllBytes(path);
+			    texture2D = new Texture2D(2, 2)
+			    {
+				    filterMode = FilterMode.Bilinear
+			    };
+			    texture2D.LoadImage(data);
+			    if (GameSettingManager.CompressImages)
+			    {
+				    texture2D.Compress(true);
+			    }
+                texture2D.Apply(true, true);
+		        return true;
+            }
+
+            // If it doesn't exist, return this
+            texture2D = null;
             return false;
         }
         

@@ -11,6 +11,7 @@ namespace ACEOCustomBuildables
         private static List<int[]> otherVariations = new List<int[]>();
         public static List<GameObject> floorIcons = new List<GameObject>();
         public static List<GameObject> itemIcons = new List<GameObject>();
+        public static List<GameObject> tileableIcons = new List<GameObject>();
         public static bool UIFailed = false;
 
         public static void ClearUI()
@@ -26,6 +27,12 @@ namespace ACEOCustomBuildables
                 Destroy(itemIcons[i]);
             }
             itemIcons = new List<GameObject>();
+
+            for (int i = 0; i < tileableIcons.Count; i++)
+            {
+                Destroy(tileableIcons[i]);
+            }
+            tileableIcons = new List<GameObject>();
 
             otherVariations = new List<int[]>();
         }
@@ -59,7 +66,7 @@ namespace ACEOCustomBuildables
 
                 if (buildableMods.Count != buildables.Count)
                 {
-                    ACEOCustomBuildables.Log($"[Mod Error] There are not the same amount of buildable mods as buildables in type {type.Name}.");
+                    ACEOCustomBuildables.Log($"[Mod Error] There are not the same amount of buildable mods as buildables in type {type.Name}. Skipped loading");
                     continue;
                 }
 
@@ -135,6 +142,10 @@ namespace ACEOCustomBuildables
                 else if (type == typeof(FloorMod))
                 {
                     floorIcons.Add(newButton);
+                }
+                else if (type == typeof(TileableMod))
+                {
+                    tileableIcons.Add(newButton);
                 }
                 else
                 {

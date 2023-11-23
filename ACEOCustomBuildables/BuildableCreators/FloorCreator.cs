@@ -33,7 +33,7 @@ namespace ACEOCustomBuildables
                 FloorMod floorMod = FileManager.Instance.buildableTypes[typeof(FloorMod)].Item2.buildableMods[i] as FloorMod;
                 if (floorMod == null)
                 {
-                    ACEOCustomBuildables.Log("[Mod Error] A buildable mod of FloorSourceCreators is not an floor mod!");
+                    ACEOCustomBuildables.Log("[Mod Error] A buildable mod of FloorCreators is not an floor mod!");
                     continue;
                 }
 

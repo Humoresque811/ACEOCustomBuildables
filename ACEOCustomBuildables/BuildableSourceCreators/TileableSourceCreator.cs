@@ -8,9 +8,9 @@ using UnityEngine;
 
 namespace ACEOCustomBuildables
 {
-    class FloorModSourceCreator : MonoBehaviour, IBuildableSourceCreator
+    class TileableSourceCreator : MonoBehaviour, IBuildableSourceCreator
     {
-        public static FloorModSourceCreator Instance { get; private set; }
+        public static TileableSourceCreator Instance { get; private set; }
 
         public List<TexturedBuildableMod> buildableMods { get; set; }
         public List<string> modPaths { get; set; }
@@ -31,7 +31,7 @@ namespace ACEOCustomBuildables
             {
                 return;
             }
-            if (!BuildableClassHelper.GetBuildableCreator(typeof(FloorMod), out IBuildableCreator buildableCreator))
+            if (!BuildableClassHelper.GetBuildableCreator(typeof(ItemMod), out IBuildableCreator buildableCreator))
             {
                 return;
             }
@@ -48,7 +48,7 @@ namespace ACEOCustomBuildables
 
             if (modPaths.Count <= 0)
             {
-                ACEOCustomBuildables.Log($"[Mod Success] {nameof(Instance)} (re-)Imported {buildableMods.Count} JSON file(s) from just the buildables folder");
+                ACEOCustomBuildables.Log($"[Mod Success] TileableSourceCreator (re-)Imported {buildableMods.Count} JSON file(s) from just the buildables folder");
                 return;
             }
 
@@ -56,14 +56,15 @@ namespace ACEOCustomBuildables
             {
                 ImportModsFromPath(modPaths[i]);
             }
-            ACEOCustomBuildables.Log($"[Mod Success] {nameof(Instance)} (re-)Imported {buildableMods.Count} JSON file(s) from just the buildables folder");
+            ACEOCustomBuildables.Log($"[Mod Success] TileableSourceCreator (re-)Imported {buildableMods.Count} JSON file(s) from just the buildables folder");
+
         }
 
         private void ImportModsFromPath(string path = "")
         {
             string internalLog = "";
             Action<string> logAction = new Action<string>(ACEOCustomBuildables.SimpleLog);
-            bool giveUsePath = FileManager.Instance.GetCorrectPath(ref path, typeof(FloorMod), logAction);
+            bool giveUsePath = FileManager.Instance.GetCorrectPath(ref path, typeof(TileableMod), logAction);
 
             if (!Directory.Exists(path))
             {
@@ -89,20 +90,20 @@ namespace ACEOCustomBuildables
                         continue;
                     }
 
-                    FloorMod floorMod = JsonUtility.FromJson<FloorMod>(JSONFileContent);
+                    TileableMod tileableMod = JsonUtility.FromJson<TileableMod>(JSONFileContent);
 
-                    if (floorMod == null)
+                    if (tileableMod == null)
                     {
                         ACEOCustomBuildables.Log("[Mod Error] Mod class is null...");
                         continue;
                     }
 
-                    if (!floorMod.enabled)
+                    if (!tileableMod.enabled)
                     {
                         continue;
                     }
 
-                    buildableMods.Add(floorMod);
+                    buildableMods.Add(tileableMod);
                     internalLog += "\nFinished modLoading";
 
                     if (giveUsePath)
@@ -114,7 +115,7 @@ namespace ACEOCustomBuildables
                         buildableMods[buildableMods.Count - 1].pathToUse = "";
                     }
 
-                    BogusInputHelper.CheckFloorMod(floorMod, logAction);
+                    BogusInputHelper.CheckTileableMod(tileableMod, logAction);
 
                     FileManager.Instance.CrossCheckIds(logAction);
                     internalLog += "\nFinished final checks";

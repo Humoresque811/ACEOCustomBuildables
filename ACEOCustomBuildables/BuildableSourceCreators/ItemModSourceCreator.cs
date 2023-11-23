@@ -45,22 +45,22 @@ namespace ACEOCustomBuildables
         {
             ClearBuildableMods(true);
 
-            ImportModFromPath();
+            ImportModsFromPath();
 
             if (modPaths.Count <= 0)
             {
-                ACEOCustomBuildables.Log("[Mod Success] Item Source Creator (re-)Imported " + buildableMods.Count + " JSON file(s) from just the buildables folder");
+                ACEOCustomBuildables.Log($"[Mod Success] {nameof(Instance)} (re-)Imported {buildableMods.Count} JSON file(s) from just the buildables folder");
                 return;
             }
 
             for (int i = 0; i < modPaths.Count; i++)
             {
-                ImportModFromPath(modPaths[i]);
+                ImportModsFromPath(modPaths[i]);
             }
-            ACEOCustomBuildables.Log("[Mod Success] Item Source Creator (re-)Imported " + buildableMods.Count + " JSON file(s) from mods and the buildables folder");
+            ACEOCustomBuildables.Log($"[Mod Success] {nameof(Instance)} (re-)Imported {buildableMods.Count} JSON file(s) from mods and the buildables folder");
         }
 
-        private void ImportModFromPath(string path = "")
+        private void ImportModsFromPath(string path = "")
         {
             string internalLog = "";
             Action<string> logAction = new Action<string>(ACEOCustomBuildables.SimpleLog);

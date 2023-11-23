@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using HarmonyLib;
 using System.Linq;
+using Steamworks;
 
 namespace ACEOCustomBuildables
 {
@@ -45,49 +46,25 @@ namespace ACEOCustomBuildables
                         continue;
                     }
 
-                    if (serializableComponent.itemIndex == serializableComponent.nullInt)
+                    if (serializableComponent.itemIndex != serializableComponent.nullInt)
                     {
-                        continue;
+                        SerializeItems(serializableComponent.itemIndex, item);
                     }
 
-                    // So if it is custom, then...
-                    CustomItemSerializable customItemSerializable = SaveLoadUtility.SetItemSerializableInfo(serializableComponent.itemIndex, item);
-                    if (customItemSerializable != null)
+                    if (serializableComponent.tileableIndex != serializableComponent.nullInt)
                     {
-                        SaveLoadUtility.itemJSONList.Add(customItemSerializable);
-                        continue;
+                        SerializeTileables(serializableComponent.tileableIndex, item);
                     }
-                    SaveLoadUtility.quicklog("Custom Serializable item was null!", false);
                 }
 
-                foreach (MergedTile mergedTile in SaveLoadUtility.zonesArray.ToList())
-                {
-                    if (!mergedTile.gameObject.TryGetComponent<CustomItemSerializableComponent>(out CustomItemSerializableComponent serializableComponent))
-                    {
-                        continue;
-                    }
-
-                    if (serializableComponent.floorIndex == serializableComponent.nullInt)
-                    {
-                        continue;
-                    }
-
-                    // So if it is custom, then...
-                    CustomFloorSerializable customFloorSerializable = SaveLoadUtility.SetFloorSeializableInfo(serializableComponent.floorIndex, mergedTile);
-                    if (customFloorSerializable != null)
-                    {
-                        SaveLoadUtility.floorJSONList.Add(customFloorSerializable);
-                        continue;
-                    }
-                    SaveLoadUtility.quicklog("Custom Serializable floor was null!", false);
-                }
+                SerializeFloors();
 
                 if (string.IsNullOrEmpty(inputSavePath))
                 {
                     inputSavePath = Singleton<SaveLoadGameDataController>.Instance.saveName;
                 }
 
-                SaveLoadUtility.createJSON(inputSavePath);
+                SaveLoadUtility.CreateJSON(inputSavePath);
             }
             catch (Exception ex)
             {
@@ -99,6 +76,54 @@ namespace ACEOCustomBuildables
             SaveLoadUtility.revetGameAfterSaving();
             SaveLoadUtility.itemJSONList = new List<CustomItemSerializable>();
             SaveLoadUtility.floorJSONList = new List<CustomFloorSerializable>();
+            SaveLoadUtility.tileableJSONList = new List<CustomTileableSerializable>();
+        }
+
+        private static void SerializeItems(in int itemIndex, in PlaceableItem item)
+        {
+            CustomItemSerializable customItemSerializable = SaveLoadUtility.SetItemSerializableInfo(itemIndex, item);
+            if (customItemSerializable != null)
+            {
+                SaveLoadUtility.itemJSONList.Add(customItemSerializable);
+                return;
+            }
+            SaveLoadUtility.quicklog("Custom Serializable item was null!", false);
+        }
+
+        private static void SerializeTileables(in int tileableIndex, in PlaceableItem tileable)
+        {
+            CustomTileableSerializable customTileableSerializable = SaveLoadUtility.SetTileableSerializableInfo(tileableIndex, tileable);
+            if (customTileableSerializable != null)
+            {
+                SaveLoadUtility.tileableJSONList.Add(customTileableSerializable);
+                return;
+            }
+            SaveLoadUtility.quicklog("Custom Serializable tileable was null!", false);
+        }
+
+        private static void SerializeFloors()
+        {
+            foreach (MergedTile mergedTile in SaveLoadUtility.zonesArray.ToList())
+            {
+                if (!mergedTile.gameObject.TryGetComponent<CustomItemSerializableComponent>(out CustomItemSerializableComponent serializableComponent))
+                {
+                    continue;
+                }
+
+                if (serializableComponent.floorIndex == serializableComponent.nullInt)
+                {
+                    continue;
+                }
+
+                // So if it is custom, then...
+                CustomFloorSerializable customFloorSerializable = SaveLoadUtility.SetFloorSeializableInfo(serializableComponent.floorIndex, mergedTile);
+                if (customFloorSerializable != null)
+                {
+                    SaveLoadUtility.floorJSONList.Add(customFloorSerializable);
+                    continue;
+                }
+                SaveLoadUtility.quicklog("Custom Serializable floor was null!", false);
+            }
         }
     }
 }

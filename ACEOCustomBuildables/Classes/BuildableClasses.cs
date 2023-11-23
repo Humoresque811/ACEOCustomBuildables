@@ -48,4 +48,13 @@ namespace ACEOCustomBuildables
     {
         public string floorVariationId;
     }
+
+    // Tileable Mod
+    public class TileableMod : TexturedBuildableMod
+    {
+        public bool originalTexturePattern;
+        public int buildCost;
+        public int operationCost;
+        public int tileSize;
+    }
 }

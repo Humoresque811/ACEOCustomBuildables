@@ -14,6 +14,30 @@ namespace ACEOCustomBuildables
         private static string currentDialog = "";
         private static Action<string> currentLogger = null;
 
+        public static void CheckTileableMod(TileableMod tileableMod, Action<string> logger)
+        {
+            if (logger == null)
+            {
+                ACEOCustomBuildables.Log("[Mod Error] Logger provided to tileable input checker is null!");
+                return;
+            }
+
+            currentLogger = logger;
+
+            if (tileableMod == null)
+            {
+                currentLogger("[Mod Error] Tileable mod provided to input checker is null");
+                return;
+            }
+
+            currentDialog = $"[Buildable Non-Critical Issue] Your mod called {BuildableClassHelper.GetModIdentification(tileableMod)} seems to have";
+
+            CheckStringModAttribute(ref tileableMod.buildMenu, TemplateManager.UIPanels.Keys.ToArray(), "a buildMenu value");
+
+            CheckIntModAttribute(ref tileableMod.buildCost, 1, -1, "a build cost");
+            CheckIntModAttribute(ref tileableMod.operationCost, 1, -1, "an operation cost");
+        }
+
         public static void CheckFloorMod(FloorMod floorMod, Action<string> logger)
         {
             if (logger == null)

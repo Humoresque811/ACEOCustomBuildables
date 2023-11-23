@@ -9,7 +9,7 @@ using HarmonyLib;
 
 namespace ACEOCustomBuildables
 {
-    [UMFHarmony(17)] //Set this to the number of harmony patches in your mod.
+    [UMFHarmony(19)] //Set this to the number of harmony patches in your mod.
     [UMFScript]
     class ACEOCustomBuildables : MonoBehaviour
     {
@@ -46,11 +46,15 @@ namespace ACEOCustomBuildables
                 itemModSourceCreator.SetUp();
                 FloorModSourceCreator floorModSourceCreator = this.gameObject.AddComponent<FloorModSourceCreator>();
                 floorModSourceCreator.SetUp();
+                TileableSourceCreator tileableSourceCreator = this.gameObject.AddComponent<TileableSourceCreator>();
+                tileableSourceCreator.SetUp();
 
                 ItemCreator itemManager = this.gameObject.AddComponent<ItemCreator>();
                 itemManager.SetUp();
                 FloorCreator floorManager = this.gameObject.AddComponent<FloorCreator>();
                 floorManager.SetUp();
+                TileableCreator tileableCreator = this.gameObject.AddComponent<TileableCreator>();
+                tileableCreator.SetUp();
 
                 fileManager.SetUpBuildableTypes();
                 fileManager.SetUpBasePaths();
@@ -58,6 +62,15 @@ namespace ACEOCustomBuildables
             catch (Exception ex)
             {
                 ACEOCustomBuildables.Log("[Mod Error] Failed to set up buildable creators! Error: " + ex.Message);
+            }
+
+            try
+            {
+                EnumManager.ValidateEnums(new Action<string>(SimpleLog));
+            }
+            catch (Exception ex)
+            {
+                ACEOCustomBuildables.Log($"[Mod Error] Error while validating enums. Error: {ex.Message}");
             }
         }
     }

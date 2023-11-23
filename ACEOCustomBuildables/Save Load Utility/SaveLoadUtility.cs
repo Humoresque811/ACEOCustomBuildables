@@ -31,6 +31,7 @@ namespace ACEOCustomBuildables
         // JSON vars
         [SerializeField] public static List<CustomItemSerializable> itemJSONList = new List<CustomItemSerializable>();
         [SerializeField] public static List<CustomFloorSerializable> floorJSONList = new List<CustomFloorSerializable>();
+        [SerializeField] public static List<CustomTileableSerializable> tileableJSONList = new List<CustomTileableSerializable>();
 
         // Function Utilities
         public static void quicklog(string message, bool logAsUnityError = false)
@@ -159,13 +160,36 @@ namespace ACEOCustomBuildables
             }
         }
 
+        public static CustomTileableSerializable SetTileableSerializableInfo(int index, PlaceableItem item)
+        {
+            try
+            {
+                // Transfer vars and nessesary info
+                CustomTileableSerializable returnItem = new CustomTileableSerializable();
+                returnItem.modId = TileableSourceCreator.Instance.buildableMods[index].id;
+
+                returnItem.position[0] = item.transform.position.x;
+                returnItem.position[1] = item.transform.position.y;
+                returnItem.position[2] = item.transform.position.z;
+
+                returnItem.floor = item.Floor;
+                returnItem.referenceID = item.ReferenceID;
+                return returnItem;
+            }
+            catch (Exception ex)
+            {
+                quicklog("Error occured in setting a serializable tileable class. Error: " + ex.Message, true);
+                return null;
+            }
+        }
+
         // JSON making!
         /// <summary>
         /// Creates the JSON file for saveLoadUtility
         /// </summary>
         /// <param name="path">This *MUST* be the save courtine's own input!</param>
         /// <param name="fileName">If you want to use a custom file name, specify it</param>
-        public static void createJSON(string path, string fileName = "CustomSaveData.json")
+        public static void CreateJSON(string path, string fileName = "CustomSaveData.json")
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -173,8 +197,7 @@ namespace ACEOCustomBuildables
             }
 
             // Make sure the array isn't empty!
-            //if (floorJSONList != null && )
-            if (!((itemJSONList != null && itemJSONList.Count != 0) || (floorJSONList != null && floorJSONList.Count != 0)))
+            if (!((itemJSONList != null && itemJSONList.Count != 0) || (floorJSONList != null && floorJSONList.Count != 0) || (tileableJSONList != null && tileableJSONList.Count != 0)))
             {
                 return;
             }
@@ -207,14 +230,14 @@ namespace ACEOCustomBuildables
 
             // JSON creation vars and systems
             string JSON;
-            CustomSerializableWrapper JSONWrapper = new CustomSerializableWrapper(itemJSONList, floorJSONList);
+            CustomSerializableWrapper JSONWrapper = new CustomSerializableWrapper(itemJSONList, floorJSONList, tileableJSONList);
             try
             {
                 JSON = JsonConvert.SerializeObject(JSONWrapper, Formatting.Indented); // We pretty print :)
             }
             catch (Exception ex)
             {
-                quicklog("Error Converting casses to JSON. Error: " + ex.Message, true);
+                quicklog("Error converting classes to JSON. Error: " + ex.Message, true);
                 return;
             }
 

@@ -15,17 +15,26 @@ namespace ACEOCustomBuildables
             {
                 this.itemIndex = index;
                 this.floorIndex = nullInt;
+                this.tileableIndex = nullInt;
             }
             if (Type.Equals(type, typeof(FloorMod)))
             {
                 this.itemIndex = nullInt;
                 this.floorIndex = index;
+                this.tileableIndex = nullInt;
+            }
+            if (Type.Equals(type, typeof(TileableMod)))
+            {
+                this.itemIndex = nullInt;
+                this.floorIndex = nullInt;
+                this.tileableIndex = index;
             }
         }
 
         public readonly int nullInt = -1;
         public int itemIndex;
         public int floorIndex;
+        public int tileableIndex;
     }
 
     // Save file
@@ -48,18 +57,28 @@ namespace ACEOCustomBuildables
         public int floor;
     }
 
+    public class CustomTileableSerializable
+    {
+        public string modId;
+        public float[] position = new float[3];
+        public int floor;
+        public string referenceID;
+    }
+
     // The Wrapper
     public class CustomSerializableWrapper
     {
         public List<CustomItemSerializable> customItemSerializables;
         public List<CustomFloorSerializable> customFloorSerializables;
+        public List<CustomTileableSerializable> customTileableSerializables;
 
         // Instantly set
-        public CustomSerializableWrapper(List<CustomItemSerializable> customItemSerializables, List<CustomFloorSerializable> customFloorSerializables)
+        public CustomSerializableWrapper(List<CustomItemSerializable> customItemSerializables, List<CustomFloorSerializable> customFloorSerializables, List<CustomTileableSerializable> customTileableSerializables)
         {
             this.customItemSerializables = new List<CustomItemSerializable>();
             this.customItemSerializables = customItemSerializables;
             this.customFloorSerializables = customFloorSerializables;
+            this.customTileableSerializables = customTileableSerializables;
         }
 
         // Set manually
@@ -67,6 +86,7 @@ namespace ACEOCustomBuildables
         {
             this.customItemSerializables = new List<CustomItemSerializable>();
             this.customFloorSerializables = new List<CustomFloorSerializable>();
+            this.customTileableSerializables = new List<CustomTileableSerializable>();
         }
     }
 }

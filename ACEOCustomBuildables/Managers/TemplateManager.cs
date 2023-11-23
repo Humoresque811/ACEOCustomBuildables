@@ -13,6 +13,7 @@ namespace ACEOCustomBuildables
         public static Dictionary<string, GameObject> UIPanels { get; private set; }
         public static GameObject ItemTemplate;
         public static GameObject FloorTemplate;
+        public static GameObject TileableTemplate;
         public static ObjectPlacementController objectPlacementControllerTemplate; 
 
 
@@ -33,6 +34,10 @@ namespace ACEOCustomBuildables
                 successFlag = false;
             }
             if (!TryGetFloorTemplate())
+            {
+                successFlag = false;
+            }
+            if (!TryGetTileableTemplate())
             {
                 successFlag = false;
             }
@@ -102,12 +107,12 @@ namespace ACEOCustomBuildables
             try
             {
                 ItemTemplate = Singleton<BuildingController>.Instance.smallPlant;
-                ACEOCustomBuildables.Log("[Mod Success] Got template item");
+                ACEOCustomBuildables.Log("[Mod Success] Got item template");
                 return true;
             }
             catch (Exception ex)
             {
-                ACEOCustomBuildables.Log("[Mod Error] Failed to get template item. Error: " + ex.Message);
+                ACEOCustomBuildables.Log("[Mod Error] Failed to get item template. Error: " + ex.Message);
                 return false;
             }
         }
@@ -117,12 +122,27 @@ namespace ACEOCustomBuildables
             try
             {
                 FloorTemplate = Singleton<BuildingController>.Instance.terminalPrefabs.hardFloor;
-                ACEOCustomBuildables.Log("[Mod Success] Got template floor");
+                ACEOCustomBuildables.Log("[Mod Success] Got floor template");
                 return true;
             }
             catch (Exception ex)
             {
-                ACEOCustomBuildables.Log("[Mod Error] Failed to get template floor. Error: " + ex.Message);
+                ACEOCustomBuildables.Log("[Mod Error] Failed to get floor template. Error: " + ex.Message);
+                return false;
+            }
+        }
+
+        private static bool TryGetTileableTemplate()
+        {
+            try
+            {
+                TileableTemplate = Singleton<BuildingController>.Instance.hedge;
+                ACEOCustomBuildables.Log("[Mod Success] Got tileable template");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ACEOCustomBuildables.Log("[Mod Error] Failed to get tileable template. Error: " + ex.Message);
                 return false;
             }
         }

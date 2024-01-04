@@ -58,6 +58,8 @@ namespace ACEOCustomBuildables
 
                 fileManager.SetUpBuildableTypes();
                 fileManager.SetUpBasePaths();
+
+                UIManager.SetUpVariations();
             }
             catch (Exception ex)
             {

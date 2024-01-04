@@ -73,6 +73,12 @@ namespace ACEOCustomBuildables
                 ACEOCustomBuildables.Log(message2);
                 DialogPanel.Instance.ShowMessagePanel(message2);
             }
+
+            // This moves over the value, for backward compatability
+            if (!string.IsNullOrEmpty(floorMod.floorVariationId))
+            {
+                floorMod.variationID = floorMod.floorVariationId;
+            }
         }
 
         public static void CheckItemMod(ItemMod itemMod, Action<string> logger)

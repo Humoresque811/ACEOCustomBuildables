@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
+using System.Linq;
 
 namespace ACEOCustomBuildables
 {
@@ -89,6 +90,16 @@ namespace ACEOCustomBuildables
             }
 
             pathExtension = "";
+            return false;
+        }
+
+        public static bool IsValidVariationModType(Type modType)
+        {
+            if (UIManager.variations.Keys.ToArray().Contains(modType))
+            {
+                return true;
+            }
+
             return false;
         }
     }

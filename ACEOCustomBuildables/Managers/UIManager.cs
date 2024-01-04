@@ -3,95 +3,116 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using Epic.OnlineServices.AntiCheatServer;
 
 namespace ACEOCustomBuildables
 {
     class UIManager : MonoBehaviour
     {
-        private static List<int[]> otherVariations = new List<int[]>();
+        public static Dictionary<Type, List<int[]>> variations = new Dictionary<Type, List<int[]>>();
+
         public static List<GameObject> floorIcons = new List<GameObject>();
         public static List<GameObject> itemIcons = new List<GameObject>();
         public static List<GameObject> tileableIcons = new List<GameObject>();
         public static bool UIFailed = false;
 
+        public static void SetUpVariations()
+        {
+            variations = new Dictionary<Type, List<int[]>>();
+
+            foreach (Type modType in FileManager.Instance.buildableTypes.Keys.ToArray())
+            {
+                if (!typeof(IVariationMod).IsAssignableFrom(modType))
+                {
+                    continue;
+                }
+
+                variations.Add(modType, new List<int[]>());
+            }
+        }
+        
         public static void ClearUI()
         {
-            for (int i = 0; i < floorIcons.Count; i++)
-            {
-                Destroy(floorIcons[i]);
-            }
-            floorIcons = new List<GameObject>();
+            floorIcons.DestroyResetList();
+            itemIcons.DestroyResetList();
+            tileableIcons.DestroyResetList();
 
-            for (int i = 0; i < itemIcons.Count; i++)
-            {
-                Destroy(itemIcons[i]);
-            }
-            itemIcons = new List<GameObject>();
-
-            for (int i = 0; i < tileableIcons.Count; i++)
-            {
-                Destroy(tileableIcons[i]);
-            }
-            tileableIcons = new List<GameObject>();
-
-            otherVariations = new List<int[]>();
+            variations = new Dictionary<Type, List<int[]>>();
         }
 
         public static void CreateAllUI()
         {
-            if (FloorModSourceCreator.Instance.buildableMods.Count > 0)
+            foreach (Type variationModType in variations.Keys.ToArray())
             {
-                // This is for variation compiling
-                List<FloorMod> floorMods = new List<FloorMod>();
-                foreach (TexturedBuildableMod buildableMod in FloorModSourceCreator.Instance.buildableMods)
+                if (!typeof(IVariationMod).IsAssignableFrom(variationModType))
                 {
-                    FloorMod floorMod = buildableMod as FloorMod;
-                    if (floorMod == null)
-                    {
-                        ACEOCustomBuildables.Log("[Mod Error] A buildable mod in FloorModSourceCreator is not a buildable mod!");
-                        continue;
-                    }
-
-                    floorMods.Add(floorMod);
+                    continue;
                 }
 
-                otherVariations = GetVariationList(floorMods);
+                BuildableClassHelper.GetBuildableSourceCreator(variationModType, out IBuildableSourceCreator buildableSourceCreator);
+
+                if (buildableSourceCreator.buildableMods.Count <= 0)
+                {
+                    continue;
+                }
+
+                IVariationMod[] variationMods = new IVariationMod[buildableSourceCreator.buildableMods.Count];
+                for (int i = 0; i < buildableSourceCreator.buildableMods.Count; i++)
+                {
+                    variationMods[i] = (IVariationMod)buildableSourceCreator.buildableMods[i];
+                }
+
+                variations[variationModType] = GetVariationList(variationMods);
             }
 
-
-            foreach (Type type in FileManager.Instance.buildableTypes.Keys)
+            foreach (Type modType in FileManager.Instance.buildableTypes.Keys)
             {
-                List<TexturedBuildableMod> buildableMods = FileManager.Instance.buildableTypes[type].Item2.buildableMods;
-                List<GameObject> buildables = FileManager.Instance.buildableTypes[type].Item3.buildables;
+                List<TexturedBuildableMod> buildableMods = FileManager.Instance.buildableTypes[modType].Item2.buildableMods;
+                List<GameObject> buildables = FileManager.Instance.buildableTypes[modType].Item3.buildables;
 
                 if (buildableMods.Count != buildables.Count)
                 {
-                    ACEOCustomBuildables.Log($"[Mod Error] There are not the same amount of buildable mods as buildables in type {type.Name}. Skipped loading");
+                    ACEOCustomBuildables.Log($"[Mod Error] There are not the same amount of buildable mods as buildables in type {modType.Name}. Skipped loading");
                     continue;
+                }
+
+                Action<Type, TexturedBuildableMod, GameObject, int> createUIIcon = null;
+                if (BuildableClassHelper.IsValidVariationModType(modType))
+                {
+                    createUIIcon = CreateUIIconVariation;
+                }
+                else
+                {
+                    createUIIcon = CreateUIIcon;
                 }
 
                 for (int i = 0; i < buildableMods.Count; i++)
                 {
-                    if (type != typeof(FloorMod))
-                    {
-                        CreateUI(buildableMods[i], buildables[i], type);
-                        continue;
-
-                    }
-
-                    if (ShouldCreateIcon(i, otherVariations))
-                    {
-                       CreateUI(buildableMods[i], buildables[i], type); 
-                    }
-                    else
-                    {
-                        floorIcons.Add(null);
-                    }
+                    createUIIcon(modType, buildableMods[i], buildables[i], i);
                 }
             }
         }
 
-        private static void CreateUI(TexturedBuildableMod buildableMod, GameObject buildable, Type type)
+        private static void CreateUIIconVariation(Type modType, TexturedBuildableMod buildableMod, GameObject buildable, int index)
+        {
+            if (ShouldCreateIcon(index, variations[modType]))
+            {
+                CreateUI(buildableMod, buildable, modType); 
+            }
+            else
+            {
+                floorIcons.Add(null);
+            }
+        }
+
+        private static void CreateUIIcon(Type modType, TexturedBuildableMod buildableMod, GameObject buildable, int index)
+        {
+            CreateUI(buildableMod, buildable, modType);
+        }
+
+        private static void CreateUI(TexturedBuildableMod buildableMod, GameObject buildable, Type modType)
         {
             try
             {
@@ -117,12 +138,13 @@ namespace ACEOCustomBuildables
                 buildUI.buildableDescription = buildableMod.description;
 
                 ItemMod itemMod = buildableMod as ItemMod;
+                FloorMod floorMod = buildableMod as FloorMod;
                 if (itemMod != null)
                 {
                     buildUI.buildableCost = itemMod.buildCost;
                     buildUI.buildableOperatingCost = itemMod.operationCost;
                 }
-                else
+                else if (floorMod != null)
                 {
                     buildUI.buildableCost = 2;
                     buildUI.buildableOperatingCost = 0;
@@ -130,20 +152,20 @@ namespace ACEOCustomBuildables
 
                 buildUI.assignedButton = newButton.GetComponent<Button>();
                 buildUI.assignedObject = buildable;
-                buildUI.modType = type;
+                buildUI.modType = modType;
                 buildUI.assignedAnimator = newButton.GetComponent<Animator>();
 
                 buildUI.convertButtonToCustom();
 
-                if (type == typeof(ItemMod))
+                if (modType == typeof(ItemMod))
                 {
                     itemIcons.Add(newButton);
                 }
-                else if (type == typeof(FloorMod))
+                else if (modType == typeof(FloorMod))
                 {
                     floorIcons.Add(newButton);
                 }
-                else if (type == typeof(TileableMod))
+                else if (modType == typeof(TileableMod))
                 {
                     tileableIcons.Add(newButton);
                 }
@@ -161,14 +183,20 @@ namespace ACEOCustomBuildables
             UIFailed = false;
         }
 
-        public static bool IndexHasVariations(int index)
+        public static bool IndexHasVariations(Type modType, int index)
         {
-            if (otherVariations[index].Length != 1)
+            if (!BuildableClassHelper.IsValidVariationModType(modType))
+            {
+                ACEOCustomBuildables.Log($"[Mod Error] Invalid mod type, in {MethodBase.GetCurrentMethod().Name} with type being {modType.Name}");
+                return false;
+            }
+
+            if (variations[modType][index].Length != 1)
             {
                 return true;
             }
 
-            if (otherVariations[index][0] == -1)
+            if (variations[modType][index][0] == -1)
             {
                 return false;
             }
@@ -176,36 +204,42 @@ namespace ACEOCustomBuildables
             return true;
         }
 
-        public static int[] GetAllVariations(int index)
+        public static int[] GetAllVariations(Type modType, int index)
         {
+            if (!BuildableClassHelper.IsValidVariationModType(modType))
+            {
+                ACEOCustomBuildables.Log($"[Mod Error] Invalid mod type, in {MethodBase.GetCurrentMethod().Name} with type being {modType.Name}");
+                return new int[0];
+            }
+
             List<int> ints = new List<int>
             {
                 index
             };
-            ints.AddRange(otherVariations[index]);
+            ints.AddRange(variations[modType][index]);
             return ints.ToArray();
         }
 
-        private static List<int[]> GetVariationList(in List<FloorMod> floorMods)
+        private static List<int[]> GetVariationList(in IVariationMod[] floorMods)
         {
             List<int[]> linkedIDs = new List<int[]>();
-            for (int i = 0; i < floorMods.Count; i++)
+            for (int i = 0; i < floorMods.Length; i++)
             {
-                if (string.Equals(floorMods[i].floorVariationId, "None") || string.IsNullOrEmpty(floorMods[i].floorVariationId))
+                if (string.Equals(floorMods[i].variationID, "None") || string.IsNullOrEmpty(floorMods[i].variationID))
                 {
                     linkedIDs.Add(new int[1] {-1});
                     continue;
                 }
 
                 List<int> ints = new List<int>();
-                for (int k = 0; k < floorMods.Count; k++)
+                for (int k = 0; k < floorMods.Length; k++)
                 {
                     if (i == k)
                     {
                         continue;
                     }
 
-                    if (string.Equals(floorMods[i].floorVariationId, floorMods[k].floorVariationId))
+                    if (string.Equals(floorMods[i].variationID, floorMods[k].variationID))
                     {
                         ints.Add(k);
                     }

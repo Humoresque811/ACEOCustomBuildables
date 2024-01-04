@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Steamworks;
 
 namespace ACEOCustomBuildables
 {
@@ -44,17 +45,24 @@ namespace ACEOCustomBuildables
     }
 
     // Floor mod
-    public class FloorMod : TexturedBuildableMod
+    public class FloorMod : TexturedBuildableMod, IVariationMod
     {
-        public string floorVariationId;
+        public string floorVariationId; // To be phased out, backwards support only
+        public string variationID { get; set; }
     }
 
     // Tileable Mod
-    public class TileableMod : TexturedBuildableMod
+    public class TileableMod : TexturedBuildableMod, IVariationMod
     {
         public bool originalTexturePattern;
         public int buildCost;
         public int operationCost;
         public int tileSize;
+        public string variationID { get; set; }
+    }
+
+    interface IVariationMod
+    {
+        string variationID { get; set; }
     }
 }

@@ -1,11 +1,11 @@
 Airport CEO Custom Buildables:
 
-ACEO Custom Buildables allows for you to add items and floors to the game, from 
+ACEO Custom Buildables allows for you to add items, floors, and tileables to the game, from 
 * The Steam Workshop
 * The Native Mods Folder
 * A new folder in the LocalLow ACEO folder (for mod development)
 
-To access mods from the steam workshop, subscribe to them, enable them in the mod menu, and play. Everything should work fine without any direct interaction with the mod. The mod supports
+To access mods from the steam workshop, subscribe to them, enable them in the mod menu, and play. Everything should work fine without any direct interaction with the mod. The mod supports:
 * Adding mods to a new game
 * Adding mods to a allready started game
 * Adding more mods at any time
@@ -24,6 +24,14 @@ Known Issues:
 Developed by Humoresque, with help from Zekew
 
 Changelog:
+1.2.1
+* Improvement: Allowed workshop mods to contain more than one type of buildable
+* Improvement: Introduced a hard limit on floor mods (at 200) to prevent byte overflow bugs
+* Improvement: Increased amount of floor mods that you can have without the overflow bug from 155 to 200
+* Improvement: Fixed very minor issues with this text (it was slightly out of date)
+* Improvement: Improved logging when loading from the workshop, significantly reduced number of messages as the system is stable
+* Bug Fix: Re-introduced mod loading from the native mods folder
+
 1.2
 * Epic: Custom Tileables!
 * Bug Fix: Reduced severity of minor error log message, because the message itself would cause loading to fail

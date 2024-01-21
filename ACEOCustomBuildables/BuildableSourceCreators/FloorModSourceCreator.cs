@@ -81,6 +81,12 @@ namespace ACEOCustomBuildables
 
                 for (int i = 0; i < directories.Length; i++)
                 {
+                    if (buildableMods.Count >= 256 - FileManager.Instance.floorIndexAddative - 1)
+                    {
+                        BogusInputHelper.AnnounceTooManyFloorMods();
+                        break;
+                    }
+
                     string JSONFileContent = FileManager.Instance.GetJSONFileContent(directories[i]);
 
                     if (string.IsNullOrEmpty(JSONFileContent))

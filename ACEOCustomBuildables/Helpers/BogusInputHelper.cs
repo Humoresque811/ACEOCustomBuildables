@@ -5,6 +5,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
+using static Enums;
+using static OnlineMapsGooglePlacesAutocompleteResult;
+using System.Drawing;
+using System.Security.Policy;
 
 namespace ACEOCustomBuildables
 {
@@ -113,6 +118,14 @@ namespace ACEOCustomBuildables
 
             CheckStringModAttribute(ref itemMod.itemPlacementArea, itemPlacementAreaOptions, "a itemPlacementArea value");
             CheckStringModAttribute(ref itemMod.buildMenu, TemplateManager.UIPanels.Keys.ToArray(), "a buildMenu value");
+        }
+
+        public static void AnnounceTooManyFloorMods()
+        {
+            ACEOCustomBuildables.Log($"There is a limit of 200 floor mods (due to game limitations). " +
+                $"This has been exceeded, so some floor mods will not be loaded.");
+            DialogPanel.Instance.ShowMessagePanel($"There is a limit of 200 floor mods (due to game limitations). " +
+                $"This has been exceeded, so some floor mods will not be loaded.");
         }
 
         // Attribute Forwarders

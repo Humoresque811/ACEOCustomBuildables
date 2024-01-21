@@ -11,14 +11,14 @@ using LapinerTools.Steam.Data;
 namespace ACEOCustomBuildables
 {
     
-    [HarmonyPatch(typeof(ModManager), "InitalizeSteamWorkshopMods")]
+    [HarmonyPatch(typeof(ModManager), "InitializeMods")]
     static class Patch_StartWorkshopLoading
     {   
         public static void Prefix()
         {
             try
             {
-                ACEOCustomBuildables.Log("[Mod Neutral] Started Loading workshop mods!");
+                ACEOCustomBuildables.Log("[Mod Neutral] Started Loading workshop mods, cleared previous mod info! - - - - ");
                 foreach (Type type in FileManager.Instance.buildableTypes.Keys)
                 {
                     BuildableClassHelper.GetBuildableSourceCreator(type, out IBuildableSourceCreator buildableSourceCreator);

@@ -19,7 +19,7 @@ namespace ACEOCustomBuildables
         public string basePath { get; private set; }
 
         public readonly string pathAddativeBase = "Buildables";
-        public readonly int floorIndexAddative = 100;
+        public readonly int floorIndexAddative = 55;
         public readonly int tileableIndexAddative = 100;
 
         public void SetUp()
